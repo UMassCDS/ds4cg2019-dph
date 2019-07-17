@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 from sklearn.decomposition import PCA
+from sklearn.preprocessing import MinMaxScaler
 
 data = pd.read_csv('../determinant_data.csv')
 
@@ -12,17 +13,17 @@ num_var = determinant_data.shape[1]
 
 calc = np.abs(np.sqrt(1/num_var))
 
+cov_mat = np.cov(determinant_data.T)
+
 pca = PCA()
 
-transformed_data = pca.fit(determinant_data).transform(determinant_data)
+transformed_data = pca.fit(cov_mat).transform(cov_mat)
 
 eig = pca.explained_variance_
 
 n = len(np.where(eig>1)[0])
 
-pca = PCA(n_components=n)
-
-transformed_data = pca.fit(determinant_data).transform(determinant_data)
+transformed_data = transformed_data[:n,:n]
 
 weights = pca.explained_variance_ratio_/np.sum(pca.explained_variance_ratio_)
 
@@ -31,5 +32,9 @@ var_load[var_load > calc] = 0
 
 factor_scores = weights @ var_load
 
-print(factor_scores.shape)
-print(factor_scores)
+health_status = np.array([determinant_data @ factor_scores]).T
+
+health_status = MinMaxScaler().fit_transform(health_status)
+
+print(health_status.shape)
+print(health_status)

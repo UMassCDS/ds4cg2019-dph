@@ -2,40 +2,78 @@ import numpy as np
 import pandas as pd
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import MinMaxScaler
+import csv
 
-def calc_pca():
-	data = pd.read_csv('determinant_data.csv', index_col=0)
-	# data.set_index('Unnamed: 0', inplace = True)
-	determinant_data = np.array(data)
 
-	num_var = determinant_data.shape[1]
+def extract_features():
+    """
+    To extract the column headers so we can map PC components to relevant factors
+    """
+    data = pd.read_csv("Determinants (std).csv", index_col=0)
+    columns = [x for x in enumerate(data.columns, 1)]
+    return columns
 
-	calc = np.abs(np.sqrt(1/num_var))
+def extract_towns():
+    """
+    Extract the town names, so that health score can have meaning
+    """
+    data = pd.read_csv("Determinants (std).csv", index_col=0)
+    towns = list(data.index)
+    return towns
 
-	cov_mat = np.cov(determinant_data.T)
+def calc_pca(data):
+    """
+    Method to calculate factor scores
+    """
+    determinant_data = np.array(data)
 
-	pca = PCA()
+    #find the number of variables
+    num_var = determinant_data.shape[1]
 
-	transformed_data = pca.fit(cov_mat).transform(cov_mat)
+    #calc is the choose the factor loadings
+    calc = np.abs(np.sqrt(1/num_var))
 
-	eig = pca.explained_variance_
+    #cov_mat is the covariance matrix of the data
+    cov_mat = np.cov(determinant_data.T)
 
-	n = len(np.where(eig>1)[0])
+    #perform PCA on the covariance matrix
+    pca = PCA()
+    transformed_data = pca.fit(cov_mat).transform(cov_mat)
 
-	transformed_data = transformed_data[:n,:n]
+    #proportion of variance present in each component
+    eig = pca.explained_variance_
+    n = len(np.where(eig>1)[0])
+    transformed_data = transformed_data[:n,:n]
 
-	weights = pca.explained_variance_ratio_/np.sum(pca.explained_variance_ratio_)
+    #weights assigned to each pc
+    weights = pca.explained_variance_ratio_/np.sum(pca.explained_variance_ratio_)
 
-	var_load = pca.components_
-	var_load[var_load > calc] = 0
+    #choose only the pc's who satisfies the constraint
+    var_load = pca.components_
+    var_load[var_load > calc] = 0
 
-	factor_scores = weights @ var_load
+    #scores assigned to each component
+    factor_scores = weights @ var_load
 
-	health_status = np.array([determinant_data @ factor_scores]).T
+    #calculate the health score for every town
+    health_status = np.array([determinant_data @ factor_scores]).T
+    health_status = MinMaxScaler().fit_transform(health_status)
+    health_status = health_status.flatten()
+    
+    return [round(x,2) for x in health_status]
 
-	health_status = MinMaxScaler().fit_transform(health_status)
+def main():
+    data = pd.read_csv('determinant_data.csv', index_col=0)
+    scores = calc_pca(data)
+    towns = extract_towns()
 
-	print(health_status.shape)
-	print(health_status)
+    #assign health scores
+    health_scores = sorted(zip(towns, scores), key = lambda x: x[1])
+    print(health_scores)
 
-calc_pca()
+    with open("pca_1.csv", "w", newline="") as f:
+        writer = csv.writer(f)
+        writer.writerows(health_scores)
+
+if __name__ == '__main__':
+    main()

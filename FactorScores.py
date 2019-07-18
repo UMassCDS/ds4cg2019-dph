@@ -18,7 +18,7 @@ class HealthRiskModel:
         # needs to built based on how we will use the factor scores to compute community risks
         pass
     
-    def _compute_factor_scores(self, x):
+    def _compute_factor_score(self, x):
         """
         Applies PCA to observational data and then computes `factor scores`.
         
@@ -50,16 +50,16 @@ class HealthRiskModel:
         
         # influential variables 
         cutoff = np.abs(np.sqrt(1/D))
-        influential_vars = {c : list(np.argwhere(pca.components_[c, :]>cutoff-0.1).flatten()) for c in selected_components}
+        influential_vars = {c:list(np.argwhere(pca.components_[c, :]>cutoff-0.1).flatten()) for c in selected_components}
         
-        # compute factor scores per component
-        factor_scores = np.sum(pca.components_[selected_components]*component_weights[:, np.newaxis], axis=1)
-        
-        return factor_scores, influential_vars
+        # compute factor score
+        factor_score = np.sum(pca.components_[selected_components]*component_weights[:, np.newaxis], axis=0)
+     
+        return factor_score, influential_vars
     
 if __name__=='__main__':
-    rml = HealthRiskModel()
+    hml = HealthRiskModel()
     df = pd.read_csv('/Users/roshanprakash/Desktop/determinant_data.csv', index_col='Unnamed: 0')
-    factor_scores, _ = rml._compute_factor_scores(df.values)
-    print(factor_scores)
+    factor_score, _ = hml._compute_factor_score(df.values)
+    print(factor_score.shape)
         

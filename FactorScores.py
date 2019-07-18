@@ -59,7 +59,7 @@ class HealthRiskModel:
     
 if __name__=='__main__':
     rml = HealthRiskModel()
-    df = pd.read_csv('/Users/roshanprakash/Desktop/determinant_data.csv', index_col='Unnamed: 0')
+    df = pd.read_csv('determinant_data.csv', index_col=0)
     factor_scores, _ = rml._compute_factor_scores(df.values)
     print(factor_scores)
         

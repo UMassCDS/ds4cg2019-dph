@@ -3,38 +3,39 @@ import pandas as pd
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import MinMaxScaler
 
-data = pd.read_csv('../determinant_data.csv')
+def calc_pca():
+	data = pd.read_csv('determinant_data.csv', index_col=0)
+	# data.set_index('Unnamed: 0', inplace = True)
+	determinant_data = np.array(data)
 
-data.set_index('Unnamed: 0', inplace = True)
+	num_var = determinant_data.shape[1]
 
-determinant_data = np.array(data)
+	calc = np.abs(np.sqrt(1/num_var))
 
-num_var = determinant_data.shape[1]
+	cov_mat = np.cov(determinant_data.T)
 
-calc = np.abs(np.sqrt(1/num_var))
+	pca = PCA()
 
-cov_mat = np.cov(determinant_data.T)
+	transformed_data = pca.fit(cov_mat).transform(cov_mat)
 
-pca = PCA()
+	eig = pca.explained_variance_
 
-transformed_data = pca.fit(cov_mat).transform(cov_mat)
+	n = len(np.where(eig>1)[0])
 
-eig = pca.explained_variance_
+	transformed_data = transformed_data[:n,:n]
 
-n = len(np.where(eig>1)[0])
+	weights = pca.explained_variance_ratio_/np.sum(pca.explained_variance_ratio_)
 
-transformed_data = transformed_data[:n,:n]
+	var_load = pca.components_
+	var_load[var_load > calc] = 0
 
-weights = pca.explained_variance_ratio_/np.sum(pca.explained_variance_ratio_)
+	factor_scores = weights @ var_load
 
-var_load = pca.components_
-var_load[var_load > calc] = 0
+	health_status = np.array([determinant_data @ factor_scores]).T
 
-factor_scores = weights @ var_load
+	health_status = MinMaxScaler().fit_transform(health_status)
 
-health_status = np.array([determinant_data @ factor_scores]).T
+	print(health_status.shape)
+	print(health_status)
 
-health_status = MinMaxScaler().fit_transform(health_status)
-
-print(health_status.shape)
-print(health_status)
+calc_pca()

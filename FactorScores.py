@@ -10,6 +10,8 @@ import pandas as pd
 import numpy as np
 from scipy.stats import spearmanr
 from sklearn.decomposition import PCA
+from sklearn.preprocessing import MinMaxScaler
+import csv
 
 class HealthRiskModel:
     
@@ -18,7 +20,7 @@ class HealthRiskModel:
         # needs to built based on how we will use the factor scores to compute community risks
         pass
     
-    def _compute_factor_scores(self, x):
+    def _compute_factor_score(self, x):
         """
         Applies PCA to observational data and then computes `factor scores`.
         
@@ -50,16 +52,37 @@ class HealthRiskModel:
         
         # influential variables 
         cutoff = np.abs(np.sqrt(1/D))
-        influential_vars = {c : list(np.argwhere(pca.components_[c, :]>cutoff-0.1).flatten()) for c in selected_components}
+        influential_vars = {c:list(np.argwhere(pca.components_[c, :]>cutoff-0.1).flatten()) for c in selected_components}
         
-        # compute factor scores per component
-        factor_scores = np.sum(pca.components_[selected_components]*component_weights[:, np.newaxis], axis=1)
-        
-        return factor_scores, influential_vars
+        # compute factor score
+        factor_score = np.sum(pca.components_[selected_components]*component_weights[:, np.newaxis], axis=0)
+     
+        return factor_score, influential_vars
+
+def extract_towns():
+        """
+        Extract the town names, so that health score can have meaning
+        """
+        data = pd.read_csv("Determinants (std).csv", index_col=0)
+        towns = list(data.index)
+        return towns
     
 if __name__=='__main__':
     rml = HealthRiskModel()
-    df = pd.read_csv('/Users/roshanprakash/Desktop/determinant_data.csv', index_col='Unnamed: 0')
-    factor_scores, _ = rml._compute_factor_scores(df.values)
-    print(factor_scores)
+    df = pd.read_csv('determinant_data.csv', index_col=0)
+    factor_scores, _ = rml._compute_factor_score(df.values)
+
+    #calculate the health score for every town
+    health_status = np.array([np.array(df) @ factor_scores]).T
+    health_status = MinMaxScaler().fit_transform(health_status)
+    health_status = health_status.flatten()
+    health_status = [round(x,2) for x in health_status]
+    
+    towns = extract_towns()
+    health_scores = sorted(zip(towns, health_status), key = lambda x: x[1])
+
+    with open("pca_2.csv", "w", newline="") as f:
+        writer = csv.writer(f)
+        writer.writerows(health_scores)
+
         

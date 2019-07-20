@@ -12,6 +12,7 @@ from scipy.stats import spearmanr
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import MinMaxScaler
 import csv
+from collections import defaultdict
 
 class HealthRiskModel:
     
@@ -66,12 +67,26 @@ def extract_towns():
         data = pd.read_csv("Determinants (std).csv", index_col=0)
         towns = list(data.index)
         return towns
+
+def extract_features():
+    """
+    To extract the column headers so we can map PC components to relevant factors
+    """
+    data = pd.read_csv("Determinants (std).csv", index_col=0)
+    columns = [x for x in enumerate(data.columns)]
+    return dict(columns)
     
 if __name__=='__main__':
     rml = HealthRiskModel()
     df = pd.read_csv('determinant_data.csv', index_col=0)
-    factor_scores, _ = rml._compute_factor_score(df.values)
-
+    factor_scores, influential_vars = rml._compute_factor_score(df.values)
+    
+    features = extract_features()
+    pc_features = {}
+    
+    for key,val in influential_vars.items():
+        pc_features[key] = [features[x] for x in val]
+    
     #calculate the health score for every town
     health_status = np.array([np.array(df) @ factor_scores]).T
     health_status = MinMaxScaler().fit_transform(health_status)
@@ -83,6 +98,4 @@ if __name__=='__main__':
 
     with open("pca_2.csv", "w", newline="") as f:
         writer = csv.writer(f)
-        writer.writerows(health_scores)
-
-        
+        writer.writerows(health_scores)  

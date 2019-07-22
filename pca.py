@@ -89,4 +89,6 @@ def main():
         writer.writerows(health_scores)
 
 if __name__ == '__main__':
-    main()
+    features = extract_features()
+    print(features)
+    # main()

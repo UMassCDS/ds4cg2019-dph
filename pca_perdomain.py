@@ -7,9 +7,9 @@ domains = {'built_environment':['no_vehicle_avail_%', 'comm_car_%', 'comm_carpoo
 'food_est_per1000'], 
 'community_context':['race_Wh_%', 'race_Afam_%', 'race_Alaska_%', 'race_Asian_%', 'race_Hawaii_%', \
 'race_Other_%', 'race_Two_%', 'race_Hisp_%', 'age_lt18_%', 'young_females_%', 'median_age', 'lt5years_%', 
-'population_density', 'rural_population_%', 'english_verywell_%'],
+'population_density', 'rural_population_%', 'english_verywell_%', 'print_media_circ_%'],
 'economy':['below_poverty_level_%', 'debt_pervaluation_%', 
-'households_recfoodstamps_%', 'snap_%', 'median_household_income_USD', 'income_capita_USD', 'gini_index', 'median_earnings_retail_USD'],
+'households_recfoodstamps_%', 'snap_%', 'median_household_income_USD', 'income_capita_USD', 'gini_index', 'median_earnings_retail_USD', 'poverty_child_%'],
 'education':['exp_perpupil_USD', 'preschool_%', 'students_disabilities_%', 'students_highneeds_%', 'student_teacher_ratio', 
 'libraries_%','exemplary_%', 'proficient_%', 'need_improve_%', 'unsatis_%', 'read_write', 'math', 'dropout_%', 'college_%', 
 'avg_ela', 'avg_math','less_than_highschool_%', 'highschool_grad_%', 'associates_degree_%', 'bachelors_degree_%', 
@@ -29,4 +29,21 @@ domains = {'built_environment':['no_vehicle_avail_%', 'comm_car_%', 'comm_carpoo
 'homeless_Shelters_per_1000', 'moved_lastyear_%', 'renter_occupied_%', 'vacant_rentals_%', 'owner_homes_%', 'occ_lt0.5_%', 
 'occ_0.5to1.0_%', 'occ_1.01to1.5_%', 'occ_1.51to2.0_%', 'occ_gt2.01_%'],
 'violence':['crimes_against_persons_%', 'crimes_against_property_%', 'crimes_against_society_%']}
-print(domains['violence'])
+
+df = pd.read_csv('data/clean_determinants.csv', index_col=0)
+columns = list(df)
+
+domains_by_no = {}
+
+for d in domains:
+    for indi in domains[d]:
+        try:
+            domains_by_no[d].append(str(columns.index(indi)))
+        except KeyError:
+            domains_by_no[d] = [str(columns.index(indi))]
+
+determinant_data = pd.read_csv('data/determinant_data.csv', index_col=0)
+
+for dom in domains_by_no:
+    domain_data = determinant_data[domains_by_no[dom]]
+    print(domain_data.head())

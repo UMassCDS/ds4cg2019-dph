@@ -10,7 +10,7 @@ def extract_features():
     To extract the column headers so we can map PC components to relevant factors
     """
     # data = pd.read_csv("Determinants (std).csv", index_col=0)
-    data = pd.read_csv("../Determinants_mn.csv", index_col=0)
+    data = pd.read_csv("data/Determinants_mn.csv", index_col=0)
     # columns = [x for x in enumerate(data.columns, 1)]
     return list(data.columns)
 
@@ -18,7 +18,7 @@ def extract_towns():
     """
     Extract the town names, so that health score can have meaning
     """
-    data = pd.read_csv("../Determinants_mn.csv", index_col=0)
+    data = pd.read_csv("data/Determinants_mn.csv", index_col=0)
     towns = list(data.index)
     return towns
 
@@ -61,7 +61,7 @@ def calc_pca(data):
 
     features = extract_features()
     loadings = zip(features, *load_table)
-    with open("loadings_1.csv", "w", newline="") as f:
+    with open("output/loadings_1.csv", "w", newline="") as f:
         writer = csv.writer(f)
         writer.writerows(loadings)
     
@@ -76,7 +76,7 @@ def calc_pca(data):
     return [round(x,2) for x in health_status]
 
 def main():
-    data = pd.read_csv('determinant_data_mn.csv', index_col=0)
+    data = pd.read_csv('data/determinant_data_mn.csv', index_col=0)
     scores = calc_pca(data)
     towns = extract_towns()
 
@@ -84,7 +84,7 @@ def main():
     health_scores = sorted(zip(towns, scores), key = lambda x: x[1])
     print(health_scores)
 
-    with open("pca_1_mn.csv", "w", newline="") as f:
+    with open("output/pca_1_mn.csv", "w", newline="") as f:
         writer = csv.writer(f)
         writer.writerows(health_scores)
 

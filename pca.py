@@ -31,8 +31,11 @@ class HealthScores():
     def extract_towns(self):
         """
         Extract the town names, so that health score can have meaning
+        TODO: FIX FOR ALL PCA
         """
         data = pd.read_csv(self.read_cols, index_col=0)
+        # TODO: clean
+        # data = pd.read_csv('data/clean_determinants_std.csv', index_col=0)
         towns = list(data.index)
         return towns
 
@@ -101,8 +104,8 @@ class HealthScores():
             writer.writerows(loadings)
 
 def main():
-    health_obj = HealthScores(cols_filepath="data/clean_determinants_std.csv", data_filepath="data/determinant_data_std.csv",\
-        pca_filepath = "output/pca_1_std.csv", loadings_filepath="output/loadings_1_std.csv")
+    health_obj = HealthScores(cols_filepath="data/all_data_std.csv", data_filepath="data/all_data_std.csv",\
+        pca_filepath = "output/pca_all_std.csv", loadings_filepath="output/loadings_all_std.csv")
     health_obj.calc_pca()
     health_obj.calc_loadings()
 

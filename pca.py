@@ -4,6 +4,46 @@ from sklearn.decomposition import PCA
 from sklearn.preprocessing import MinMaxScaler
 import csv
 
+def comp_pca(data):
+    determinant_data = np.array(data)
+
+    #find the number of variables
+    num_var = determinant_data.shape[1]
+
+    #calc is the choose the factor loadings
+    calc = np.abs(np.sqrt(1/num_var))
+
+    #cov_mat is the covariance matrix of the data
+    cov_mat = np.cov(determinant_data.T)
+
+    #perform PCA on the covariance matrix
+    pca = PCA()
+    transformed_data = pca.fit(cov_mat).transform(cov_mat)
+
+    #proportion of variance present in each component
+    eig = pca.explained_variance_
+    n = len(np.where(eig>1)[0])
+    transformed_data = transformed_data[:n,:n]
+
+    #weights assigned to each pc
+    weights = pca.explained_variance_ratio_/np.sum(pca.explained_variance_ratio_)
+
+    #choose only the pc's who satisfies the constraint
+    var_load = pca.components_
+    var_load[var_load > calc] = 0
+
+    #scores assigned to each component
+    factor_scores = weights @ var_load
+
+    #calculate the health score for every town
+    health_status = np.array([determinant_data @ factor_scores]).T
+    health_status = MinMaxScaler().fit_transform(health_status)
+    health_status = health_status.flatten()
+    
+    scores = [round(x,2) for x in health_status]
+    
+    return scores
+
 class HealthScores():
     '''
     Get healthscores for all towns
@@ -78,7 +118,7 @@ class HealthScores():
         
         scores = [round(x,2) for x in health_status]
         towns = self.extract_towns()
-
+        
         #assign health scores
         health_scores = sorted(zip(towns, scores), key = lambda x: x[1])
         print(health_scores)

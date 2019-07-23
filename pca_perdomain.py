@@ -1,7 +1,7 @@
 import pandas as pd 
 import numpy as np 
 from sklearn.decomposition import PCA
-from pca import calc_pca, extract_features, extract_towns
+from pca import comp_pca
 
 domains = {'built_environment':['no_vehicle_avail_%', 'comm_car_%', 'comm_carpool_%', 'comm_bus_%', 'comm_walk_%',\
 'comm_cycle_%', 'comm_taxi_%', 'comm_wfh_%','tobbaco_retailers_2019_%', 'liquor_per1000', 'supermarket_per1000', 
@@ -32,7 +32,8 @@ domains = {'built_environment':['no_vehicle_avail_%', 'comm_car_%', 'comm_carpoo
 'violence':['crimes_against_persons_%', 'crimes_against_property_%', 'crimes_against_society_%']}
 
 def score_per_domain(raw, inp, out):
-    columns = extract_features(raw)
+    info = pd.read_csv(raw, index_col=0)
+    columns = list(info)
     domains_by_no = {}
 
     for d in domains:
@@ -41,18 +42,18 @@ def score_per_domain(raw, inp, out):
                 domains_by_no[d].append(str(columns.index(indi)))
             except KeyError:
                 domains_by_no[d] = [str(columns.index(indi))]
-    
+
     determinant_data = pd.read_csv(inp, index_col=0)
 
     domain_scores = []
     for dom in domains_by_no:
         domain_data = determinant_data[domains_by_no[dom]]
-        domain_scores.append(calc_pca(domain_data))
+        domain_scores.append(comp_pca(domain_data))
 
     domain_scores = np.array(domain_scores).T
     avg_dom = np.array([[round(x,2) for x in np.average(domain_scores, axis =1)]]).T
     domain_scores = np.concatenate((domain_scores, avg_dom), axis = 1)
-    towns = extract_towns(raw)
+    towns = list(info.index)
     dom_names = ['index','BE', 'CC', 'ECON', 'EDU', 'EMP', 'HEA', 'HOU', 'VIO', 'AVG']
     towns = np.array([towns]).T
     domain_scores = np.concatenate((towns, domain_scores), axis = 1)

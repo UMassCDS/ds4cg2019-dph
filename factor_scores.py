@@ -64,7 +64,7 @@ def extract_towns():
         """
         Extract the town names, so that health score can have meaning
         """
-        data = pd.read_csv("data/Determinants (std).csv", index_col=0)
+        data = pd.read_csv("data/clean_determinants_std.csv", index_col=0)
         towns = list(data.index)
         return towns
 
@@ -72,13 +72,13 @@ def extract_features():
     """
     To extract the column headers so we can map PC components to relevant factors
     """
-    data = pd.read_csv("data/Determinants (std).csv", index_col=0)
+    data = pd.read_csv("data/clean_determinants_std.csv", index_col=0)
     columns = [x for x in enumerate(data.columns)]
     return dict(columns)
     
 if __name__=='__main__':
     rml = HealthRiskModel()
-    df = pd.read_csv('data/determinant_data.csv', index_col=0)
+    df = pd.read_csv('data/determinant_data_std.csv', index_col=0)
     factor_scores, influential_vars = rml._compute_factor_score(df.values)
     
     features = extract_features()

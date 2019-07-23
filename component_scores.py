@@ -69,7 +69,7 @@ def extract_towns():
         """
         Extract the town names, so that health score can have meaning
         """
-        data = pd.read_csv("data/Determinants (std).csv", index_col=0)
+        data = pd.read_csv("data/clean_determinants_std.csv", index_col=0)
         towns = list(data.index)
         return towns
 
@@ -77,13 +77,13 @@ def extract_features():
     """
     To extract the column headers so we can map PC components to relevant factors
     """
-    data = pd.read_csv("data/Determinants (std).csv", index_col=0)
+    data = pd.read_csv("data/clean_determinants_std.csv", index_col=0)
     columns = [x for x in enumerate(data.columns)]
     return dict(columns)
     
 if __name__=='__main__':
     pc_obj = pc_component_scores()
-    data = pd.read_csv('data/determinant_data.csv', index_col=0)
+    data = pd.read_csv('data/determinant_data_std.csv', index_col=0)
     cov_mat = pc_obj.correlation_matrix(data)
     comp_scores = pc_obj.compute_component_score(cov_mat)
     print(comp_scores)

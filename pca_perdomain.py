@@ -61,13 +61,16 @@ def score_per_domain(raw, inp, out):
     df.set_index('index', inplace=True)
 
     df.to_csv(out)
-    return df
 
 def main():
-    raw = 'data/clean_determinants.csv'
-    inp = 'data/determinant_data.csv'
+    raw = 'data/clean_determinants_std.csv'
+    inp = 'data/determinant_data_std.csv'
     out = 'output/pca_domains_std.csv'
-    df = score_per_domain(raw, inp, out)
+    score_per_domain(raw, inp, out)
+    raw = 'data/clean_determinants_mn.csv'
+    inp = 'data/determinant_data_mn.csv'
+    out = 'output/pca_domains_mn.csv'
+    score_per_domain(raw, inp, out)
 
 if __name__ == "__main__":
     main()

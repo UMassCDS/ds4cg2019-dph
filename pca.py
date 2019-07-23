@@ -5,20 +5,20 @@ from sklearn.preprocessing import MinMaxScaler
 import csv
 
 
-def extract_features():
+def extract_features(file_path):
     """
     To extract the column headers so we can map PC components to relevant factors
     """
     # data = pd.read_csv("Determinants (std).csv", index_col=0)
-    data = pd.read_csv("data/Determinants_mn.csv", index_col=0)
+    data = pd.read_csv(file_path, index_col=0)
     # columns = [x for x in enumerate(data.columns, 1)]
     return list(data.columns)
 
-def extract_towns():
+def extract_towns(file_path):
     """
     Extract the town names, so that health score can have meaning
     """
-    data = pd.read_csv("data/Determinants_mn.csv", index_col=0)
+    data = pd.read_csv(file_path, index_col=0)
     towns = list(data.index)
     return towns
 
@@ -53,17 +53,18 @@ def calc_pca(data):
     var_load = pca.components_
     var_load[var_load > calc] = 0
     
-    
+    '''
     #print table of indicator variable loadings
     load_table = []
     for i in range(n):
         load_table.append(var_load[:, i]) 
 
-    features = extract_features()
+    features = extract_features("data/Determinants_mn.csv")
     loadings = zip(features, *load_table)
     with open("output/loadings_1.csv", "w", newline="") as f:
         writer = csv.writer(f)
         writer.writerows(loadings)
+    '''
     
     #scores assigned to each component
     factor_scores = weights @ var_load
@@ -78,7 +79,7 @@ def calc_pca(data):
 def main():
     data = pd.read_csv('data/determinant_data_mn.csv', index_col=0)
     scores = calc_pca(data)
-    towns = extract_towns()
+    towns = extract_towns("data/Determinants_mn.csv")
 
     #assign health scores
     health_scores = sorted(zip(towns, scores), key = lambda x: x[1])
@@ -89,6 +90,6 @@ def main():
         writer.writerows(health_scores)
 
 if __name__ == '__main__':
-    features = extract_features()
+    features = extract_features("data/Determinants_mn.csv")
     print(features)
     # main()

@@ -31,31 +31,43 @@ domains = {'built_environment':['no_vehicle_avail_%', 'comm_car_%', 'comm_carpoo
 'occ_0.5to1.0_%', 'occ_1.01to1.5_%', 'occ_1.51to2.0_%', 'occ_gt2.01_%'],
 'violence':['crimes_against_persons_%', 'crimes_against_property_%', 'crimes_against_society_%']}
 
-columns = extract_features('data/clean_determinants.csv')
+def score_per_domain(raw, inp, out):
+    columns = extract_features(raw)
+    domains_by_no = {}
 
-domains_by_no = {}
+    for d in domains:
+        for indi in domains[d]:
+            try:
+                domains_by_no[d].append(str(columns.index(indi)))
+            except KeyError:
+                domains_by_no[d] = [str(columns.index(indi))]
+    
+    determinant_data = pd.read_csv(inp, index_col=0)
 
-for d in domains:
-    for indi in domains[d]:
-        try:
-            domains_by_no[d].append(str(columns.index(indi)))
-        except KeyError:
-            domains_by_no[d] = [str(columns.index(indi))]
+    domain_scores = []
+    for dom in domains_by_no:
+        domain_data = determinant_data[domains_by_no[dom]]
+        domain_scores.append(calc_pca(domain_data))
 
-determinant_data = pd.read_csv('data/determinant_data.csv', index_col=0)
+    domain_scores = np.array(domain_scores).T
+    avg_dom = np.array([[round(x,2) for x in np.average(domain_scores, axis =1)]]).T
+    domain_scores = np.concatenate((domain_scores, avg_dom), axis = 1)
+    towns = extract_towns(raw)
+    dom_names = ['index','BE', 'CC', 'ECON', 'EDU', 'EMP', 'HEA', 'HOU', 'VIO', 'AVG']
+    towns = np.array([towns]).T
+    domain_scores = np.concatenate((towns, domain_scores), axis = 1)
 
-domain_scores = []
-for dom in domains_by_no:
-    domain_data = determinant_data[domains_by_no[dom]]
-    domain_scores.append(calc_pca(domain_data))
+    df = pd.DataFrame(data = domain_scores, columns = dom_names)
+    df.set_index('index', inplace=True)
 
-domain_scores = np.array(domain_scores).T
-avg_dom = np.array([[round(x,2) for x in np.average(domain_scores, axis =1)]]).T
-domain_scores = np.concatenate((domain_scores, avg_dom), axis = 1)
-towns = extract_towns('data/clean_determinants.csv')
-dom_names = ['BE', 'CC', 'ECON', 'EDU', 'EMP']
+    df.to_csv(out)
+    return df
 
-print(towns)
+def main():
+    raw = 'data/clean_determinants.csv'
+    inp = 'data/determinant_data.csv'
+    out = 'output/pca_domains_std.csv'
+    df = score_per_domain(raw, inp, out)
 
-print(domain_scores.shape)
-print(domain_scores)
+if __name__ == "__main__":
+    main()

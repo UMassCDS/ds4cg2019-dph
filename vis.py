@@ -1,12 +1,11 @@
 import pandas as pd 
 import numpy as np 
 import matplotlib.pyplot as plt 
-'''
+
 data = pd.read_csv('output/pca_1_std.csv',index_col=0)
 print(data.columns)
 # print(data.head())
 # plt.bar(x = data.index, height=data[1])
-'''
 
 def visualize_domains(file_path, n, ver):
     domain_data = pd.read_csv(file_path, index_col=0).sort_values(by='AVG')

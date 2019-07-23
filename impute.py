@@ -4,8 +4,8 @@ from sklearn.experimental import enable_iterative_imputer
 from sklearn.impute import IterativeImputer
 from sklearn.linear_model import BayesianRidge
 
-data = pd.read_csv('data/Determinants (std).csv')
-#data = pd.read_csv('../Determinants_mn.csv')
+# data = pd.read_csv('data/Determinants (std).csv')
+data = pd.read_csv('data/Determinants_mn.csv')
 
 data_drop = ['pop_bachelorsdegree_%', 'risk_per1000']
 

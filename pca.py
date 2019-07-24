@@ -73,9 +73,9 @@ class HealthScores():
         Extract the town names, so that health score can have meaning
         TODO: FIX FOR ALL PCA
         """
-        data = pd.read_csv(self.read_cols, index_col=0)
+        # data = pd.read_csv(self.read_cols, index_col=0)
         # TODO: clean
-        # data = pd.read_csv('data/clean_determinants_std.csv', index_col=0)
+        data = pd.read_csv('data/clean_determinants_std.csv', index_col=0)
         towns = list(data.index)
         return towns
 

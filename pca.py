@@ -236,7 +236,7 @@ def main():
     health_obj.calc_loadings()
     health_obj.score_per_domain()
     health_obj.write_corr_mat()
-
+    
     health_obj = HealthScores(cols_filepath="data/clean_determinant_mn.csv", data_filepath="data/determinant_data_mn.csv",\
        pca_filepath = "output/pca_determinant_mn.csv", loadings_filepath="output/loadings_determinant_mn.csv", domain_filepath="output/pca_domains_determinant_mn.csv")
     health_obj.calc_pca(write=True)
@@ -255,7 +255,7 @@ def main():
     health_obj.calc_loadings()    
     
     health_obj = HealthScores(cols_filepath="data/all_data_std.csv", data_filepath="data/all_data_std.csv",\
-       pca_filepath = "output/pca_all_std.csv", loadings_filepath="output/loadings_all_std.csv", corrmat_filepath = "output/correlation_matrix_all_std.csv.csv")
+       pca_filepath = "output/pca_all_std.csv", loadings_filepath="output/loadings_all_std.csv", corrmat_filepath = "output/correlation_matrix_all_std.csv")
     health_obj.calc_pca(write=True)
     health_obj.calc_loadings()
     health_obj.write_corr_mat()

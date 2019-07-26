@@ -90,7 +90,7 @@ def visualize_corr_mat(file_path, write_path, grid_size = 35, size_scale = 80):
         x = x + features
     
     for f in range(n):
-        for i in range(n):
+        for _ in range(n):
             y = y + [features[f]]
 
     fig = plt.figure()
@@ -162,12 +162,15 @@ def visualize_corr_mat(file_path, write_path, grid_size = 35, size_scale = 80):
     plt.savefig(write_path)
     
 def main():
-	# visualize_domains("output/pca_domains_std.csv", 5, 'STD')
-	# visualize_domains("output/pca_domains_mn.csv", 5, 'MN')
+	#visualize_domains("output/pca_domains_std.csv", 5, 'STD')
+	#visualize_domains("output/pca_domains_mn.csv", 5, 'MN')
 	#visualize_pca('output/pca_1_std.csv','output/pca_1_mn.csv','output/pca_all_std.csv','output/pca_all_mn.csv',3)
     #visualize_corr_mat('output/correlation_matrix_determinant_std.csv', 'visualizations/correlation_matrix_determinant_vis')
     #visualize_corr_mat('output/correlation_matrix_all_std.csv', 'visualizations/correlation_matrix_all_vis', grid_size = 40, size_scale = 10)
-    visualize_corr_mat('output/correlation_matrix_outcome_std.csv', 'visualizations/correlation_matrix_outcome_vis', grid_size = 20, size_scale = 50)
+    #visualize_corr_mat('output/correlation_matrix_outcome_std.csv', 'visualizations/correlation_matrix_outcome_vis', grid_size = 20, size_scale = 50)
+    #compare_results('output/pca_determinant_mn.csv', 'output/pca_determinant_std.csv', 'visualizations/result_comparison_determinant')
+    #compare_results('output/pca_all_mn.csv', 'output/pca_all_std.csv', 'visualizations/result_comparison_all')
+    #compare_results('output/pca_outcome_mn.csv', 'output/pca_outcome_std.csv', 'visualizations/result_outcome_determinant')
 
 def value_to_color(val):
     n_colors = 256
@@ -181,6 +184,21 @@ def value_to_color(val):
         if ind > 255:
             res = palette[255]
     return res
+
+def compare_results(cov_file, corr_file, write_file):
+    dataA = pd.read_csv(cov_file, index_col=0, names = ['index','COV'])
+    dataB = pd.read_csv(corr_file, index_col=0, names = ['index','CORR'])
+    comp = dataA.join(dataB, on=['index'], how = 'inner')
+
+    fig = plt.figure(figsize=(10,10))
+    
+    plt.scatter(comp['COV'], comp['CORR'])
+    plt.title('Comparison of Covariance and Correlation Matrix PCA Results for Determinant Subset')
+    plt.xlim(-0.02,1.02)
+    plt.ylim(-0.02,1.02)
+    plt.xlabel('Covariance Matrix Results')
+    plt.ylabel('Correlation Matrix Results')
+    plt.savefig(write_file)
 
 
 if __name__ == "__main__":

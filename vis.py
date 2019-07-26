@@ -222,7 +222,5 @@ def compare_results_per_domain(cov_file, corr_file, write_file):
 
     plt.savefig(write_file)
 
-
-
 if __name__ == "__main__":
 	main() 

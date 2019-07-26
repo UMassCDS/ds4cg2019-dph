@@ -4,46 +4,6 @@ from sklearn.decomposition import PCA
 from sklearn.preprocessing import MinMaxScaler
 import csv
 
-def comp_pca(data):
-    determinant_data = np.array(data)
-
-    #find the number of variables
-    num_var = determinant_data.shape[1]
-
-    #calc is the choose the factor loadings
-    calc = np.abs(np.sqrt(1/num_var))
-
-    #cov_mat is the covariance matrix of the data
-    cov_mat = np.cov(determinant_data.T)
-
-    #perform PCA on the covariance matrix
-    pca = PCA()
-    transformed_data = pca.fit(cov_mat).transform(cov_mat)
-
-    #proportion of variance present in each component
-    eig = pca.explained_variance_
-    n = len(np.where(eig>1)[0])
-    transformed_data = transformed_data[:n,:n]
-
-    #weights assigned to each pc
-    weights = pca.explained_variance_ratio_/np.sum(pca.explained_variance_ratio_)
-
-    #choose only the pc's who satisfies the constraint
-    var_load = pca.components_
-    var_load[var_load > calc] = 0
-
-    #scores assigned to each component
-    factor_scores = weights @ var_load
-
-    #calculate the health score for every town
-    health_status = np.array([determinant_data @ factor_scores]).T
-    health_status = MinMaxScaler().fit_transform(health_status)
-    health_status = health_status.flatten()
-    
-    scores = [round(x,2) for x in health_status]
-    
-    return scores
-
 class HealthScores():
     '''
     Get healthscores for all towns
@@ -184,6 +144,26 @@ class HealthScores():
             writer = csv.writer(f)
             writer.writerows(loadings)
     
+    def load_domains(self):
+        columns = self.extract_features()
+        domains_by_no = {}
+        domains = self.domains
+
+        for d in domains:
+            for indi in domains[d]:
+                try:
+                    domains_by_no[d].append(str(columns.index(indi)))
+                except KeyError:
+                    domains_by_no[d] = [str(columns.index(indi))]
+
+        determinant_data = pd.read_csv(self.data, index_col=0)
+
+        domain_data = {}
+        for dom in domains_by_no:
+            domain_data[dom] = determinant_data[domains_by_no[dom]]
+        
+        return domain_data
+    
     def score_per_domain(self):
         columns = self.extract_features()
         domains_by_no = {}
@@ -226,8 +206,25 @@ class HealthScores():
         df.set_index("\\", inplace = True)
         
         df.to_csv(self.corrmat_file)
+    
+    def write_corr_mat_per_dom(self):
+        data = self.load_domains()
+        for d in self.domains:
+            curr = data[d]
+            col = list(curr)
+            column_num = list(map(int, col))
+            column_name = list(np.array(self.extract_features())[column_num])
+            index = np.array([column_name]).T
+            matrix = self.calc_corr_mat(curr)
+            matrix = np.concatenate((index, matrix), axis =1)
+            headers = ["\\"] + column_name
+            df = pd.DataFrame(data = matrix, columns = headers)
+            df.set_index("\\", inplace=True)
+            df.to_csv('output/correlation_matrix_' + d +'_std.csv')
+            
 
-def main():    
+def main():
+    '''    
     health_obj = HealthScores(cols_filepath="data/clean_determinant_std.csv", data_filepath="data/determinant_data_std.csv",\
        pca_filepath = "output/pca_determinant_std.csv", loadings_filepath="output/loadings_determinant_std.csv", domain_filepath="output/pca_domains_determinant_std.csv",\
            corrmat_filepath = "output/correlation_matrix_determinant_std.csv")
@@ -263,6 +260,13 @@ def main():
        pca_filepath = "output/pca_all_mn.csv", loadings_filepath="output/loadings_all_mn.csv")
     health_obj.calc_pca(write=True)
     health_obj.calc_loadings()
+    '''
+    health_obj = HealthScores(cols_filepath="data/clean_determinant_std.csv", data_filepath="data/determinant_data_std.csv",\
+       pca_filepath = "output/pca_determinant_std.csv", loadings_filepath="output/loadings_determinant_std.csv", domain_filepath="output/pca_domains_determinant_std.csv",\
+           corrmat_filepath = "output/correlation_matrix_determinant_std.csv")
+    health_obj.write_corr_mat_per_dom()
     
+
+
 if __name__ == '__main__':
     main()

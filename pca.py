@@ -122,7 +122,7 @@ class HealthScores():
         num_var = determinant_data.shape[1]
 
         #calc is the choose the factor loadings
-        calc = np.abs(np.sqrt(1/num_var))
+        calc = np.abs(np.sqrt(1/num_var)) - 0.1
 
         #cov_mat is the covariance matrix of the data
         cov_mat = np.cov(determinant_data.T)

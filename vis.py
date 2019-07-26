@@ -170,7 +170,8 @@ def main():
     #visualize_corr_mat('output/correlation_matrix_outcome_std.csv', 'visualizations/correlation_matrix_outcome_vis', grid_size = 20, size_scale = 50)
     #compare_results('output/pca_determinant_mn.csv', 'output/pca_determinant_std.csv', 'visualizations/result_comparison_determinant')
     #compare_results('output/pca_all_mn.csv', 'output/pca_all_std.csv', 'visualizations/result_comparison_all')
-    #compare_results('output/pca_outcome_mn.csv', 'output/pca_outcome_std.csv', 'visualizations/result_outcome_determinant')
+    #compare_results('output/pca_outcome_mn.csv', 'output/pca_outcome_std.csv', 'visualizations/result_comparison_outcome')
+    compare_results_per_domain('output/pca_domains_determinant_mn.csv', 'output/pca_domains_determinant_std.csv', 'visualizations/result_comparison_domain')
 
 def value_to_color(val):
     n_colors = 256
@@ -186,9 +187,9 @@ def value_to_color(val):
     return res
 
 def compare_results(cov_file, corr_file, write_file):
-    dataA = pd.read_csv(cov_file, index_col=0, names = ['index','COV'])
-    dataB = pd.read_csv(corr_file, index_col=0, names = ['index','CORR'])
-    comp = dataA.join(dataB, on=['index'], how = 'inner')
+    cov = pd.read_csv(cov_file, index_col=0, names = ['index','COV'])
+    corr = pd.read_csv(corr_file, index_col=0, names = ['index','CORR'])
+    comp = cov.join(corr, on=['index'], how = 'inner')
 
     fig = plt.figure(figsize=(10,10))
     
@@ -199,6 +200,28 @@ def compare_results(cov_file, corr_file, write_file):
     plt.xlabel('Covariance Matrix Results')
     plt.ylabel('Correlation Matrix Results')
     plt.savefig(write_file)
+
+def compare_results_per_domain(cov_file, corr_file, write_file):
+    cov = pd.read_csv(cov_file, index_col=0)
+    corr = pd.read_csv(corr_file, index_col=0)
+
+    domains = np.array(list(cov)[:-1]).reshape((2,4))
+
+    fig, ax = plt.subplots(2, 4, sharex='col', sharey='row')
+    fig.set_size_inches(20,10)
+    fig.suptitle("Comparison of Covariance and Correlation Matrix PCA Results per Domain")
+
+    for i in range(2):
+        for j in range(4):
+            dom = domains[i,j]
+            ax[i,j].scatter(cov[dom], corr[dom])
+            ax[i,j].set_title(dom)
+    
+    fig.text(0.5, 0.04, 'Covariance Matrix Results', ha='center', va='center')
+    fig.text(0.06, 0.5, 'Correlation Matrix Results', ha='center', va='center', rotation='vertical')
+
+    plt.savefig(write_file)
+
 
 
 if __name__ == "__main__":

@@ -227,8 +227,7 @@ class HealthScores():
         
         df.to_csv(self.corrmat_file)
 
-def main():
-    
+def main():    
     health_obj = HealthScores(cols_filepath="data/clean_determinant_std.csv", data_filepath="data/determinant_data_std.csv",\
        pca_filepath = "output/pca_determinant_std.csv", loadings_filepath="output/loadings_determinant_std.csv", domain_filepath="output/pca_domains_determinant_std.csv",\
            corrmat_filepath = "output/correlation_matrix_determinant_std.csv")

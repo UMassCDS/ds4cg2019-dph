@@ -264,7 +264,8 @@ def main():
     health_obj = HealthScores(cols_filepath="data/clean_determinant_std.csv", data_filepath="data/determinant_data_std.csv",\
        pca_filepath = "output/pca_determinant_std.csv", loadings_filepath="output/loadings_determinant_std.csv", domain_filepath="output/pca_domains_determinant_std.csv",\
            corrmat_filepath = "output/correlation_matrix_determinant_std.csv")
-    health_obj.write_corr_mat_per_dom()
+    scores = health_obj.calc_pca(write=False)
+    print(scores)
     
 
 

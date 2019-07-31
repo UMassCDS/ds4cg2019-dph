@@ -3,12 +3,13 @@ import pandas as pd
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import MinMaxScaler
 import csv
+from scipy.stats import pearsonr
 
 class HealthScores():
     '''
     Get healthscores for all towns
     '''
-    def __init__(self, cols_filepath, data_filepath, pca_filepath, loadings_filepath=None, domain_filepath=None, corrmat_filepath = None):
+    def __init__(self, cols_filepath, data_filepath, pca_filepath, loadings_filepath=None, domain_filepath=None, corrmat_filepath = None, pvalue_filepath = None):
         '''
         Initialize variables
         '''
@@ -18,6 +19,7 @@ class HealthScores():
         self.loadings_file = loadings_filepath
         self.domain_file = domain_filepath
         self.corrmat_file = corrmat_filepath
+        self.pvalue_file = pvalue_filepath
 
         self.domains = {'built_environment':['no_vehicle_avail_%', 'comm_car_%', 'comm_carpool_%', 'comm_bus_%', 'comm_walk_%',\
                     'comm_cycle_%', 'comm_taxi_%', 'comm_wfh_%','tobbaco_retailers_2019_%', 'liquor_per1000', 'supermarket_per1000', 
@@ -234,18 +236,60 @@ class HealthScores():
             df = pd.DataFrame(data = matrix, columns = headers)
             df.set_index("\\", inplace=True)
             df.to_csv('output/correlation_matrix_' + d + '.csv')
-            
+    
+    def p_values(self, data):
+        _,N = data.shape
+        pvals = []
+        for i in range(N):
+            row = []
+            for j in range(N):
+                _, p = pearsonr(data[:, i], data[:, j])
+                row.append(p)
+            pvals.append(row)
+        return np.array(pvals)
+    
+    def write_p_vales(self):
+        data = self.load_data()
+        pvals = self.p_values(data)
+        feat = self.extract_features()
+        index = np.array([feat]).T
+        pvals = np.concatenate((index, pvals), axis = 1)
+        headers = ["\\"] + feat
+        df = pd.DataFrame(data= pvals, columns= headers)
+        df.set_index("\\", inplace=True)
+        df.to_csv(self.pvalue_file)
+    
+    def write_p_values_per_dom(self):
+        data = self.load_domains()
+        for d in self.domains:
+            curr = data[d]
+            col = list(curr)
+            column_num = list(map(int, col))
+            column_name = list(np.array(self.extract_features())[column_num])
+            index = np.array([column_name]).T
 
+            pvals = self.p_values(np.array(curr))
+            headers = ["\\"] + column_name
+            pvals = np.concatenate((index, pvals), axis = 1)
+
+            df = pd.DataFrame(data = pvals, columns = headers)
+            df.set_index("\\", inplace = True)
+            df.to_csv('output/p_values_'+d+'.csv')
+            
 def main():   
     health_obj = HealthScores(cols_filepath="data/health_determinants.csv", data_filepath="data/determinant_data_std.csv",\
        pca_filepath = "output/pca_determinant_std.csv", loadings_filepath="output/loadings_determinant_std.csv", domain_filepath="output/pca_domains_std.csv",\
-           corrmat_filepath = "output/correlation_matrix_determinant.csv")
-    health_obj.calc_pca(write=False)
-    health_obj.calc_loadings()
-    # health_obj.score_per_domain()
-    # health_obj.write_corr_mat()
-    # health_obj.write_corr_mat_per_dom()
-    '''
+           corrmat_filepath = "output/correlation_matrix_determinant.csv", pvalue_filepath = "output/p_values_determinant.csv")
+
+    health_obj.calc_pca(write=True)
+    health_obj.calc_loadings()  
+    health_obj.score_per_domain()
+    health_obj.write_corr_mat()
+    health_obj.write_p_vales()
+    health_obj.write_corr_mat_per_dom()
+    health_obj.write_p_values_per_dom()
+    
+    
     health_obj = HealthScores(cols_filepath="data/health_determinants.csv", data_filepath="data/determinant_data_mn.csv",\
        pca_filepath = "output/pca_determinant_mn.csv", loadings_filepath="output/loadings_determinant_mn.csv", domain_filepath="output/pca_domains_mn.csv")
     health_obj.calc_pca(write=False)
@@ -254,10 +298,11 @@ def main():
     
     health_obj = HealthScores(cols_filepath="data/health_outcomes.csv", data_filepath="data/outcome_data_std.csv",\
        pca_filepath = "output/pca_outcome_std.csv", loadings_filepath="output/loadings_outcome_std.csv",\
-            corrmat_filepath = "output/correlation_matrix_outcome.csv")
-    health_obj.calc_pca(write=False)
+       corrmat_filepath = "output/correlation_matrix_outcome.csv", pvalue_filepath = "output/p_values_outcome.csv")
+    health_obj.calc_pca(write=True)
     health_obj.calc_loadings()
     health_obj.write_corr_mat()
+    health_obj.write_p_vales()
     
     health_obj = HealthScores(cols_filepath="data/health_outcomes.csv", data_filepath="data/outcome_data_mn.csv",\
        pca_filepath = "output/pca_outcome_mn.csv", loadings_filepath="output/loadings_outcome_mn.csv")
@@ -265,15 +310,17 @@ def main():
     health_obj.calc_loadings()    
 
     health_obj = HealthScores(cols_filepath="data/all_data.csv", data_filepath="data/all_data_std.csv",\
-       pca_filepath = "output/pca_all_std.csv", loadings_filepath="output/loadings_all_std.csv", corrmat_filepath = "output/correlation_matrix_all.csv")
-    health_obj.calc_pca(write=False)
+       pca_filepath = "output/pca_all_std.csv", loadings_filepath="output/loadings_all_std.csv", corrmat_filepath = "output/correlation_matrix_all.csv",\
+           pvalue_filepath = "output/p_values_all.csv")
+    health_obj.calc_pca(write=True)
     health_obj.calc_loadings()
     health_obj.write_corr_mat()
+    health_obj.write_p_vales()
 
     health_obj = HealthScores(cols_filepath="data/all_data.csv", data_filepath="data/all_data_mn.csv",\
        pca_filepath = "output/pca_all_mn.csv", loadings_filepath="output/loadings_all_mn.csv")
     health_obj.calc_pca(write=False)
     health_obj.calc_loadings()
-    '''
+
 if __name__ == '__main__':
     main()

@@ -162,25 +162,28 @@ def visualize_corr_mat(file_path, write_path, grid_size = 35, size_scale = 80):
     plt.savefig(write_path)
     
 def main():
-	#visualize_domains("output/pca_domains_std.csv", 5, 'STD')
-	#visualize_domains("output/pca_domains_mn.csv", 5, 'MN')
+    visualize_corr_mat('output/correlation_matrix_determinant.csv', 'visualizations/correlation_matrix_determinant_vis')
+    visualize_corr_mat('output/correlation_matrix_all.csv', 'visualizations/correlation_matrix_all_vis', grid_size = 40, size_scale = 50)
+    visualize_corr_mat('output/correlation_matrix_outcome.csv', 'visualizations/correlation_matrix_outcome_vis', grid_size = 20, size_scale = 300)
+    
+    visualize_domains("output/pca_domains_std.csv", 5, 'STD')
+    visualize_domains("output/pca_domains_mn.csv", 5, 'MN')
+        
+    compare_results('output/pca_determinant_mn.csv', 'output/pca_determinant_std.csv', 'visualizations/result_comparison_determinant')
+    compare_results('output/pca_all_mn.csv', 'output/pca_all_std.csv', 'visualizations/result_comparison_all')
+    compare_results('output/pca_outcome_mn.csv', 'output/pca_outcome_std.csv', 'visualizations/result_comparison_outcome')
+    compare_results_per_domain('output/pca_domains_mn.csv', 'output/pca_domains_std.csv', 'visualizations/result_comparison_domain')
+
 	#visualize_pca('output/pca_1_std.csv','output/pca_1_mn.csv','output/pca_all_std.csv','output/pca_all_mn.csv',3)
-    #visualize_corr_mat('output/correlation_matrix_determinant_std.csv', 'visualizations/correlation_matrix_determinant_vis')
-    #visualize_corr_mat('output/correlation_matrix_all_std.csv', 'visualizations/correlation_matrix_all_vis', grid_size = 40, size_scale = 10)
-    #visualize_corr_mat('output/correlation_matrix_outcome_std.csv', 'visualizations/correlation_matrix_outcome_vis', grid_size = 20, size_scale = 50)
-    #compare_results('output/pca_determinant_mn.csv', 'output/pca_determinant_std.csv', 'visualizations/result_comparison_determinant')
-    #compare_results('output/pca_all_mn.csv', 'output/pca_all_std.csv', 'visualizations/result_comparison_all')
-    #compare_results('output/pca_outcome_mn.csv', 'output/pca_outcome_std.csv', 'visualizations/result_comparison_outcome')
-    #compare_results_per_domain('output/pca_domains_determinant_mn.csv', 'output/pca_domains_determinant_std.csv', 'visualizations/result_comparison_domain')
-    #visualize_corr_mat('output/correlation_matrix_built_environment_std.csv', 'visualizations/correlation_matrix_built_environment_vis', grid_size = 18, size_scale = 600)
-    #visualize_corr_mat('output/correlation_matrix_community_context_std.csv', 'visualizations/correlation_matrix_community_context_vis', grid_size = 18, size_scale = 600)
-    #visualize_corr_mat('output/correlation_matrix_economy_std.csv', 'visualizations/correlation_matrix_economy_vis', grid_size = 24, size_scale = 1000)
-    #visualize_corr_mat('output/correlation_matrix_education_std.csv', 'visualizations/correlation_education_vis', grid_size = 20, size_scale = 600)
-    #visualize_corr_mat('output/correlation_matrix_employment_std.csv', 'visualizations/correlation_employment_vis', grid_size = 20, size_scale = 600)
-    #visualize_corr_mat('output/correlation_matrix_healthcare_access_std.csv', 'visualizations/correlation_healthcare_access_vis', grid_size = 25, size_scale = 700)
-    #visualize_corr_mat('output/correlation_matrix_housing_std.csv', 'visualizations/correlation_housing_vis', grid_size = 30, size_scale = 700)
-    #visualize_corr_mat('output/correlation_matrix_violence_std.csv', 'visualizations/correlation_violence_vis', grid_size = 20, size_scale = 2000)
-    pass
+
+    visualize_corr_mat('output/correlation_matrix_built_environment.csv', 'visualizations/correlation_matrix_built_environment_vis', grid_size = 18, size_scale = 2200)
+    visualize_corr_mat('output/correlation_matrix_community_context.csv', 'visualizations/correlation_matrix_community_context_vis', grid_size = 18, size_scale = 1500)
+    visualize_corr_mat('output/correlation_matrix_economy.csv', 'visualizations/correlation_matrix_economy_vis', grid_size = 24, size_scale = 4000)
+    visualize_corr_mat('output/correlation_matrix_education.csv', 'visualizations/correlation_matrix_education_vis', grid_size = 20, size_scale = 1000)
+    visualize_corr_mat('output/correlation_matrix_employment.csv', 'visualizations/correlation_matrix_employment_vis', grid_size = 20, size_scale = 800)
+    visualize_corr_mat('output/correlation_matrix_healthcare_access.csv', 'visualizations/correlation_matrix_healthcare_access_vis', grid_size = 25, size_scale = 5000)
+    visualize_corr_mat('output/correlation_matrix_housing.csv', 'visualizations/correlation_matrix_housing_vis', grid_size = 30, size_scale = 1000)
+    visualize_corr_mat('output/correlation_matrix_violence.csv', 'visualizations/correlation_matrix_violence_vis', grid_size = 20, size_scale = 20000)
 
 def value_to_color(val):
     n_colors = 256

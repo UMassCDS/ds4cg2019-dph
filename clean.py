@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 from sklearn.preprocessing import MinMaxScaler
 
+'''
 def nomalize_percent(x):
     return float(x/100)
 
@@ -34,6 +35,7 @@ clean = []
 rate = []
 norm = []
 perc = []
+
 
 for c in columns[1:]:
     if (sub_set[c].isna().sum() > 175):
@@ -90,14 +92,18 @@ for c in columns[1:]:
             perc.append(c)
             sub_set.loc[:,c] = np.array(sub_set[c])/household_no
             sub_set.rename(index=str, columns={c:c+'_%'}, inplace = True)
+'''
+sub_set = pd.read_csv('data/health_determinant.csv', index_col=0)
 
 columns = list(sub_set)
 
-for c in columns[1:]:
+for c in columns:
     sub_set.loc[:,c] = (sub_set[c]-sub_set[c].mean())#/sub_set[c].std()
 
+sub_set.to_csv('data/determinant_data_mn.csv')
+'''
 sub_set.set_index('Unnamed: 0', inplace = True)
-sub_set.to_csv('../cleaned_sub1_mean_cent.csv')
+sub_set.to_csv('../cleaned_sub_1_raw.csv')
 
 print("COLUMNS DROPPED DUE TO INCORRECT DATA")
 print(inc_data)
@@ -122,3 +128,4 @@ print('\n')
 print("COLUMNS THAT HAD TO BE CONVERTED TO PERCENT")
 print(perc)
 print('\n')
+'''

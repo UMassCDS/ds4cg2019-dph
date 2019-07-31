@@ -5,21 +5,21 @@ from sklearn.impute import IterativeImputer
 from sklearn.linear_model import BayesianRidge
 
 # data = pd.read_csv('data/Determinants (std).csv')
-data = pd.read_csv('data/Determinants_mn.csv')
+data = pd.read_csv('data/determinant_negated.csv')
 
-data_drop = ['pop_bachelorsdegree_%', 'risk_per1000']
+#data_drop = ['pop_bachelorsdegree_%', 'risk_per1000']
 
 data.set_index('index', inplace = True)
 
-data = data.drop(data_drop, axis = 1)
+#data = data.drop(data_drop, axis = 1)
 
-data.to_csv('data/clean_determinants.csv')
+#data.to_csv('data/clean_determinants.csv')
 
 output = IterativeImputer(estimator = BayesianRidge(), sample_posterior=True).fit_transform(data)
 
 df = pd.DataFrame(output)
 
-df.to_csv('data/determinant_data.csv')
+df.to_csv('data/health_determinant.csv')
 
 '''
 data = pd.read_csv('../health_outcomes.csv')

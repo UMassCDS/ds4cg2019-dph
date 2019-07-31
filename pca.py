@@ -119,7 +119,7 @@ class HealthScores():
         health_status = MinMaxScaler().fit_transform(health_status)
         health_status = health_status.flatten()
         
-        scores = [round(x,2) for x in health_status]
+        scores = [round(1-x,2) for x in health_status]
         towns = self.extract_towns()
 
         if(write == True):
@@ -130,6 +130,7 @@ class HealthScores():
             with open(self.output, "w", newline="") as f:
                 writer = csv.writer(f)
                 writer.writerows(health_scores)
+        
         return scores 
 
     def load_data(self):

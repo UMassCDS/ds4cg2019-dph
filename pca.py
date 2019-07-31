@@ -107,6 +107,7 @@ class HealthScores():
         #weights assigned to each pc
         weights = pca.explained_variance_ratio_/np.sum(pca.explained_variance_ratio_)
 
+        print('shape of explained_variance_', pca.explained_variance_.shape)
         #choose only the pc's who satisfies the constraint
         self.var_load = pca.components_
         self.var_load[self.var_load > calc] = 0
@@ -239,40 +240,40 @@ def main():
     health_obj = HealthScores(cols_filepath="data/health_determinants.csv", data_filepath="data/determinant_data_std.csv",\
        pca_filepath = "output/pca_determinant_std.csv", loadings_filepath="output/loadings_determinant_std.csv", domain_filepath="output/pca_domains_std.csv",\
            corrmat_filepath = "output/correlation_matrix_determinant.csv")
-    health_obj.calc_pca(write=True)
+    health_obj.calc_pca(write=False)
     health_obj.calc_loadings()
-    health_obj.score_per_domain()
-    health_obj.write_corr_mat()
-    health_obj.write_corr_mat_per_dom()
-    
+    # health_obj.score_per_domain()
+    # health_obj.write_corr_mat()
+    # health_obj.write_corr_mat_per_dom()
+    '''
     health_obj = HealthScores(cols_filepath="data/health_determinants.csv", data_filepath="data/determinant_data_mn.csv",\
        pca_filepath = "output/pca_determinant_mn.csv", loadings_filepath="output/loadings_determinant_mn.csv", domain_filepath="output/pca_domains_mn.csv")
-    health_obj.calc_pca(write=True)
+    health_obj.calc_pca(write=False)
     health_obj.calc_loadings()
     health_obj.score_per_domain()
     
     health_obj = HealthScores(cols_filepath="data/health_outcomes.csv", data_filepath="data/outcome_data_std.csv",\
        pca_filepath = "output/pca_outcome_std.csv", loadings_filepath="output/loadings_outcome_std.csv",\
             corrmat_filepath = "output/correlation_matrix_outcome.csv")
-    health_obj.calc_pca(write=True)
+    health_obj.calc_pca(write=False)
     health_obj.calc_loadings()
     health_obj.write_corr_mat()
     
     health_obj = HealthScores(cols_filepath="data/health_outcomes.csv", data_filepath="data/outcome_data_mn.csv",\
        pca_filepath = "output/pca_outcome_mn.csv", loadings_filepath="output/loadings_outcome_mn.csv")
-    health_obj.calc_pca(write=True)
+    health_obj.calc_pca(write=False)
     health_obj.calc_loadings()    
 
     health_obj = HealthScores(cols_filepath="data/all_data.csv", data_filepath="data/all_data_std.csv",\
        pca_filepath = "output/pca_all_std.csv", loadings_filepath="output/loadings_all_std.csv", corrmat_filepath = "output/correlation_matrix_all.csv")
-    health_obj.calc_pca(write=True)
+    health_obj.calc_pca(write=False)
     health_obj.calc_loadings()
     health_obj.write_corr_mat()
 
     health_obj = HealthScores(cols_filepath="data/all_data.csv", data_filepath="data/all_data_mn.csv",\
        pca_filepath = "output/pca_all_mn.csv", loadings_filepath="output/loadings_all_mn.csv")
-    health_obj.calc_pca(write=True)
+    health_obj.calc_pca(write=False)
     health_obj.calc_loadings()
-
+    '''
 if __name__ == '__main__':
     main()

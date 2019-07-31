@@ -3,79 +3,104 @@ import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-def visualize_pca(file_std, file_mn, file_all_std, file_all_mn, n):
-	barWidth = 0.3
-	_, ((ax0, ax1), (ax2, ax3)) = plt.subplots(2,2, figsize=(15,7))
+def visualize_pca_determinants(file_std, file_mn, file_all_std, file_all_mn, n, visualize_file):
+    barWidth = 0.3
+    _, ((ax0, ax1), (ax2, ax3)) = plt.subplots(2,2, figsize=(15,7))
 
-	d0 = pd.read_csv(file_std,names=['Town','Health_Score'])
-	d0.set_index('Town',inplace=True)
-	t0 = d0.iloc[:n]
-	b0 = d0.iloc[-n:]
-	v0 = pd.concat([t0,b0])
-	ax0.bar(x=v0.index,height=v0['Health_Score'],width=barWidth, align='center', color='r')
-	ax0.set_title('Standardized Data - Determinants only')
+    d0 = pd.read_csv(file_std,names=['Town','Health_Score'])
+    d0.set_index('Town',inplace=True)
+    t0 = d0.iloc[:n]
+    b0 = d0.iloc[-n:]
+    v0 = pd.concat([t0,b0])
+    ax0.bar(x=v0.index,height=v0['Health_Score'],width=barWidth, align='center', color='r')
+    ax0.set_title('Standardized Data - Determinants only')
 
-	d1 = pd.read_csv(file_mn,names=['Town','Health_Score'])
-	d1.set_index('Town',inplace=True)
-	t1 = d1.iloc[:n]
-	b1= d1.iloc[-n:]
-	v1 = pd.concat([t1,b1])
-	ax1.bar(x=v1.index,height=v1['Health_Score'],width=barWidth, align='center',color='r')
-	ax1.set_title('Mean Normalized Data - Determinants only')
-	
-	d2 = pd.read_csv(file_all_std,names=['Town','Health_Score'])
-	d2.set_index('Town',inplace=True)
-	t2 = d2.iloc[:n]
-	b2= d2.iloc[-n:]
-	v2 = pd.concat([t2,b2])
-	ax2.bar(x=v2.index,height=v2['Health_Score'],width=barWidth, align='center',color='r')
-	ax2.set_title('Standardized Data')
+    d1 = pd.read_csv(file_mn,names=['Town','Health_Score'])
+    d1.set_index('Town',inplace=True)
+    t1 = d1.iloc[:n]
+    b1= d1.iloc[-n:]
+    v1 = pd.concat([t1,b1])
+    ax1.bar(x=v1.index,height=v1['Health_Score'],width=barWidth, align='center',color='r')
+    ax1.set_title('Mean Normalized Data - Determinants only')
+    
+    d2 = pd.read_csv(file_all_std,names=['Town','Health_Score'])
+    d2.set_index('Town',inplace=True)
+    t2 = d2.iloc[:n]
+    b2= d2.iloc[-n:]
+    v2 = pd.concat([t2,b2])
+    ax2.bar(x=v2.index,height=v2['Health_Score'],width=barWidth, align='center',color='r')
+    ax2.set_title('Standardized Data')
 
-	d3 = pd.read_csv(file_all_mn,names=['Town','Health_Score'])
-	d3.set_index('Town',inplace=True)
-	t3 = d3.iloc[:n]
-	b3= d3.iloc[-n:]
-	v3 = pd.concat([t3,b3])
-	ax3.bar(x=v3.index,height=v3['Health_Score'],width=barWidth, align='center',color='r')
-	ax3.set_title('Mean Normalized Data')
+    d3 = pd.read_csv(file_all_mn,names=['Town','Health_Score'])
+    d3.set_index('Town',inplace=True)
+    t3 = d3.iloc[:n]
+    b3= d3.iloc[-n:]
+    v3 = pd.concat([t3,b3])
+    ax3.bar(x=v3.index,height=v3['Health_Score'],width=barWidth, align='center',color='r')
+    ax3.set_title('Mean Normalized Data')
 
-	plt.tight_layout()
-	plt.show()
+    plt.tight_layout()
+    plt.show()
+    plt.savefig(visualize_file)
+
+def visualize_pca_outcomes(file_std, file_mn, n, visualize_file):
+    barWidth = 0.3
+    _, ((ax0, ax1)) = plt.subplots(1,2, figsize=(15,7))
+
+    d0 = pd.read_csv(file_std,names=['Town','Health_Score'])
+    d0.set_index('Town',inplace=True)
+    t0 = d0.iloc[:n]
+    b0 = d0.iloc[-n:]
+    v0 = pd.concat([t0,b0])
+    ax0.bar(x=v0.index,height=v0['Health_Score'],width=barWidth, align='center', color='b')
+    ax0.set_title('Standardized Data - Outcomes only')
+
+    d1 = pd.read_csv(file_mn,names=['Town','Health_Score'])
+    d1.set_index('Town',inplace=True)
+    t1 = d1.iloc[:n]
+    b1= d1.iloc[-n:]
+    v1 = pd.concat([t1,b1])
+    ax1.bar(x=v1.index,height=v1['Health_Score'],width=barWidth, align='center',color='b')
+    ax1.set_title('Mean Normalized Data - Outcomes only')
+
+    plt.tight_layout()
+    plt.show()
+    plt.savefig(visualize_file)
 
 def visualize_domains(file_path, n, ver):
-	domain_data = pd.read_csv(file_path, index_col=0).sort_values(by='AVG')
-	domain_names = list(domain_data)
+    domain_data = pd.read_csv(file_path, index_col=0).sort_values(by='AVG')
+    domain_names = list(domain_data)
 
-	bot_domains = domain_data.head(n)
-	bot_names = list(bot_domains.index)
-	bot_data = np.array(bot_domains).T
+    bot_domains = domain_data.head(n)
+    bot_names = list(bot_domains.index)
+    bot_data = np.array(bot_domains).T
 
-	barWidth = 0.075
+    barWidth = 0.075
 
-	r1 = np.arange(n)
-	r2 = [x+barWidth for x in r1]
-	r3 = [x+barWidth for x in r2]
-	r4 = [x+barWidth for x in r3]
-	r5 = [x+barWidth for x in r4]
-	r6 = [x+barWidth for x in r5]
-	r7 = [x+barWidth for x in r6]
-	r8 = [x+barWidth for x in r7]
-	r9 = [x+barWidth for x in r8]
+    r1 = np.arange(n)
+    r2 = [x+barWidth for x in r1]
+    r3 = [x+barWidth for x in r2]
+    r4 = [x+barWidth for x in r3]
+    r5 = [x+barWidth for x in r4]
+    r6 = [x+barWidth for x in r5]
+    r7 = [x+barWidth for x in r6]
+    r8 = [x+barWidth for x in r7]
+    r9 = [x+barWidth for x in r8]
 
-	r = [r1, r2, r3, r4, r5, r6, r7, r8, r9]
+    r = [r1, r2, r3, r4, r5, r6, r7, r8, r9]
 
-	plt.figure(figsize=(12,6))
+    plt.figure(figsize=(12,6))
 
-	for t,r_i in enumerate(r):
-		plt.bar(r_i, bot_data[t,:], width=barWidth, label = domain_names[t], align='center')
-	
-	plt.xticks([num + barWidth for num in range(n)], bot_names)
-	plt.xlabel('Municipality')
-	plt.ylabel('Health Score')
-	plt.ylim(top=1)
-	plt.title('Health Scores per Domain for the Lowest Scored Towns with ' + ver + ' Data')
-	plt.legend()
-	plt.savefig('visualizations/score_per_domain_' + ver.lower())
+    for t,r_i in enumerate(r):
+        plt.bar(r_i, bot_data[t,:], width=barWidth, label = domain_names[t], align='center')
+    
+    plt.xticks([num + barWidth for num in range(n)], bot_names)
+    plt.xlabel('Municipality')
+    plt.ylabel('Health Score')
+    plt.ylim(top=1)
+    plt.title('Health Scores per Domain for the Lowest Scored Towns with ' + ver + ' Data')
+    plt.legend()
+    plt.savefig('visualizations/score_per_domain_' + ver.lower())
 
 def visualize_corr_mat(file_path, write_path, grid_size = 35, size_scale = 80):
     corr_mat = pd.read_csv(file_path, index_col=0)
@@ -162,28 +187,29 @@ def visualize_corr_mat(file_path, write_path, grid_size = 35, size_scale = 80):
     plt.savefig(write_path)
     
 def main():
-    visualize_corr_mat('output/correlation_matrix_determinant.csv', 'visualizations/correlation_matrix_determinant_vis')
-    visualize_corr_mat('output/correlation_matrix_all.csv', 'visualizations/correlation_matrix_all_vis', grid_size = 40, size_scale = 50)
-    visualize_corr_mat('output/correlation_matrix_outcome.csv', 'visualizations/correlation_matrix_outcome_vis', grid_size = 20, size_scale = 300)
+    # visualize_corr_mat('output/correlation_matrix_determinant.csv', 'visualizations/correlation_matrix_determinant_vis')
+    # visualize_corr_mat('output/correlation_matrix_all.csv', 'visualizations/correlation_matrix_all_vis', grid_size = 40, size_scale = 50)
+    # visualize_corr_mat('output/correlation_matrix_outcome.csv', 'visualizations/correlation_matrix_outcome_vis', grid_size = 20, size_scale = 300)
     
-    visualize_domains("output/pca_domains_std.csv", 5, 'STD')
-    visualize_domains("output/pca_domains_mn.csv", 5, 'MN')
+    # visualize_domains("output/pca_domains_std.csv", 5, 'STD')
+    # visualize_domains("output/pca_domains_mn.csv", 5, 'MN')
         
-    compare_results('output/pca_determinant_mn.csv', 'output/pca_determinant_std.csv', 'visualizations/result_comparison_determinant')
-    compare_results('output/pca_all_mn.csv', 'output/pca_all_std.csv', 'visualizations/result_comparison_all')
-    compare_results('output/pca_outcome_mn.csv', 'output/pca_outcome_std.csv', 'visualizations/result_comparison_outcome')
-    compare_results_per_domain('output/pca_domains_mn.csv', 'output/pca_domains_std.csv', 'visualizations/result_comparison_domain')
+    # compare_results('output/pca_determinant_mn.csv', 'output/pca_determinant_std.csv', 'visualizations/result_comparison_determinant')
+    # compare_results('output/pca_all_mn.csv', 'output/pca_all_std.csv', 'visualizations/result_comparison_all')
+    # compare_results('output/pca_outcome_mn.csv', 'output/pca_outcome_std.csv', 'visualizations/result_comparison_outcome')
+    # compare_results_per_domain('output/pca_domains_mn.csv', 'output/pca_domains_std.csv', 'visualizations/result_comparison_domain')
 
-	#visualize_pca('output/pca_1_std.csv','output/pca_1_mn.csv','output/pca_all_std.csv','output/pca_all_mn.csv',3)
+    # visualize_pca_determinants('output/pca_determinant_std.csv','output/pca_determinant_mn.csv','output/pca_all_std.csv','output/pca_all_mn.csv',3,'visualizations/pca_high_low_3.png')
+    visualize_pca_outcomes('output/pca_outcome_std.csv','output/pca_outcome_mn.csv',3,'visualizations/outcome_high_low_3.png')
 
-    visualize_corr_mat('output/correlation_matrix_built_environment.csv', 'visualizations/correlation_matrix_built_environment_vis', grid_size = 18, size_scale = 2200)
-    visualize_corr_mat('output/correlation_matrix_community_context.csv', 'visualizations/correlation_matrix_community_context_vis', grid_size = 18, size_scale = 1500)
-    visualize_corr_mat('output/correlation_matrix_economy.csv', 'visualizations/correlation_matrix_economy_vis', grid_size = 24, size_scale = 4000)
-    visualize_corr_mat('output/correlation_matrix_education.csv', 'visualizations/correlation_matrix_education_vis', grid_size = 20, size_scale = 1000)
-    visualize_corr_mat('output/correlation_matrix_employment.csv', 'visualizations/correlation_matrix_employment_vis', grid_size = 20, size_scale = 800)
-    visualize_corr_mat('output/correlation_matrix_healthcare_access.csv', 'visualizations/correlation_matrix_healthcare_access_vis', grid_size = 25, size_scale = 5000)
-    visualize_corr_mat('output/correlation_matrix_housing.csv', 'visualizations/correlation_matrix_housing_vis', grid_size = 30, size_scale = 1000)
-    visualize_corr_mat('output/correlation_matrix_violence.csv', 'visualizations/correlation_matrix_violence_vis', grid_size = 20, size_scale = 20000)
+    # visualize_corr_mat('output/correlation_matrix_built_environment.csv', 'visualizations/correlation_matrix_built_environment_vis', grid_size = 18, size_scale = 2200)
+    # visualize_corr_mat('output/correlation_matrix_community_context.csv', 'visualizations/correlation_matrix_community_context_vis', grid_size = 18, size_scale = 1500)
+    # visualize_corr_mat('output/correlation_matrix_economy.csv', 'visualizations/correlation_matrix_economy_vis', grid_size = 24, size_scale = 4000)
+    # visualize_corr_mat('output/correlation_matrix_education.csv', 'visualizations/correlation_matrix_education_vis', grid_size = 20, size_scale = 1000)
+    # visualize_corr_mat('output/correlation_matrix_employment.csv', 'visualizations/correlation_matrix_employment_vis', grid_size = 20, size_scale = 800)
+    # visualize_corr_mat('output/correlation_matrix_healthcare_access.csv', 'visualizations/correlation_matrix_healthcare_access_vis', grid_size = 25, size_scale = 5000)
+    # visualize_corr_mat('output/correlation_matrix_housing.csv', 'visualizations/correlation_matrix_housing_vis', grid_size = 30, size_scale = 1000)
+    # visualize_corr_mat('output/correlation_matrix_violence.csv', 'visualizations/correlation_matrix_violence_vis', grid_size = 20, size_scale = 20000)
 
 def value_to_color(val):
     n_colors = 256
@@ -235,4 +261,4 @@ def compare_results_per_domain(cov_file, corr_file, write_file):
     plt.savefig(write_file)
 
 if __name__ == "__main__":
-	main() 
+    main() 

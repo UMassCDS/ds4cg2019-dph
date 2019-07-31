@@ -91,9 +91,17 @@ class HealthScores():
         pca = PCA()
         transformed_data = pca.fit(cov_mat).transform(cov_mat)
 
-        #proportion of variance present in each component
-        eig = pca.explained_variance_
-        self.n = len(np.where(eig>1)[0])
+        # kaiser criterion : Components with eigen_values > 1.0 should be retained
+        selected_components = np.argwhere(pca.explained_variance_>1.0).flatten()
+        selected_vr = pca.explained_variance_ratio_[selected_components]
+
+        # second criterion : Among selected components, retain those with proportion of variance  > 10%
+        mod_idxs = np.argwhere(selected_vr.flatten()>0.1)
+        selected_vr = selected_vr[selected_vr>0.1]
+        selected_components = selected_components[mod_idxs].flatten()
+
+        self.n = len(selected_components)
+
         transformed_data = transformed_data[:self.n,:self.n]
 
         #weights assigned to each pc
@@ -264,8 +272,6 @@ def main():
        pca_filepath = "output/pca_all_mn.csv", loadings_filepath="output/loadings_all_mn.csv")
     health_obj.calc_pca(write=True)
     health_obj.calc_loadings()
-
-
 
 if __name__ == '__main__':
     main()

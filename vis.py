@@ -7,36 +7,32 @@ def visualize_pca_determinants(file_std, file_mn, file_all_std, file_all_mn, n, 
     barWidth = 0.3
     _, ((ax0, ax1), (ax2, ax3)) = plt.subplots(2,2, figsize=(15,7))
 
-    d0 = pd.read_csv(file_std,names=['Town','Health_Score'])
-    d0.set_index('Town',inplace=True)
+    d0 = pd.read_csv(file_std,index_col=0)
     t0 = d0.iloc[:n]
     b0 = d0.iloc[-n:]
     v0 = pd.concat([t0,b0])
-    ax0.bar(x=v0.index,height=v0['Health_Score'],width=barWidth, align='center', color='r')
+    ax0.bar(x=v0.index,height=v0['Health Score'],width=barWidth, align='center', color='r')
     ax0.set_title('Standardized Data - Determinants only')
 
-    d1 = pd.read_csv(file_mn,names=['Town','Health_Score'])
-    d1.set_index('Town',inplace=True)
+    d1 = pd.read_csv(file_mn,index_col=0)
     t1 = d1.iloc[:n]
     b1= d1.iloc[-n:]
     v1 = pd.concat([t1,b1])
-    ax1.bar(x=v1.index,height=v1['Health_Score'],width=barWidth, align='center',color='r')
+    ax1.bar(x=v1.index,height=v1['Health Score'],width=barWidth, align='center',color='r')
     ax1.set_title('Mean Normalized Data - Determinants only')
     
-    d2 = pd.read_csv(file_all_std,names=['Town','Health_Score'])
-    d2.set_index('Town',inplace=True)
+    d2 = pd.read_csv(file_all_std,index_col=0)
     t2 = d2.iloc[:n]
     b2= d2.iloc[-n:]
     v2 = pd.concat([t2,b2])
-    ax2.bar(x=v2.index,height=v2['Health_Score'],width=barWidth, align='center',color='r')
+    ax2.bar(x=v2.index,height=v2['Health Score'],width=barWidth, align='center',color='r')
     ax2.set_title('Standardized Data')
 
-    d3 = pd.read_csv(file_all_mn,names=['Town','Health_Score'])
-    d3.set_index('Town',inplace=True)
+    d3 = pd.read_csv(file_all_mn,index_col=0)
     t3 = d3.iloc[:n]
     b3= d3.iloc[-n:]
     v3 = pd.concat([t3,b3])
-    ax3.bar(x=v3.index,height=v3['Health_Score'],width=barWidth, align='center',color='r')
+    ax3.bar(x=v3.index,height=v3['Health Score'],width=barWidth, align='center',color='r')
     ax3.set_title('Mean Normalized Data')
 
     plt.tight_layout()
@@ -46,20 +42,18 @@ def visualize_pca_outcomes(file_std, file_mn, n, visualize_file):
     barWidth = 0.3
     _, ((ax0, ax1)) = plt.subplots(1,2, figsize=(15,7))
 
-    d0 = pd.read_csv(file_std,names=['Town','Health_Score'])
-    d0.set_index('Town',inplace=True)
+    d0 = pd.read_csv(file_std,index_col=0)
     t0 = d0.iloc[:n]
     b0 = d0.iloc[-n:]
     v0 = pd.concat([t0,b0])
-    ax0.bar(x=v0.index,height=v0['Health_Score'],width=barWidth, align='center', color='b')
+    ax0.bar(x=v0.index,height=v0['Health Score'],width=barWidth, align='center', color='b')
     ax0.set_title('Standardized Data - Outcomes only')
 
-    d1 = pd.read_csv(file_mn,names=['Town','Health_Score'])
-    d1.set_index('Town',inplace=True)
+    d1 = pd.read_csv(file_mn,index_col=0)
     t1 = d1.iloc[:n]
     b1= d1.iloc[-n:]
     v1 = pd.concat([t1,b1])
-    ax1.bar(x=v1.index,height=v1['Health_Score'],width=barWidth, align='center',color='b')
+    ax1.bar(x=v1.index,height=v1['Health Score'],width=barWidth, align='center',color='b')
     ax1.set_title('Mean Normalized Data - Outcomes only')
 
     plt.tight_layout()

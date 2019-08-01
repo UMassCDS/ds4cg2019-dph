@@ -4,6 +4,7 @@ from sklearn.decomposition import PCA
 from sklearn.preprocessing import MinMaxScaler
 import csv
 from scipy.stats import pearsonr
+from scipy.misc import logsumexp
 
 class HealthScores():
     '''
@@ -76,26 +77,29 @@ class HealthScores():
         Method to calculate factor scores
         """
         data = None
+        cut_off = None
         if dom_data[0]:
             data = dom_data[1]
+            cut_off = 1e-2
         else:
             data = pd.read_csv(self.data, index_col=0)
+            cut_off = 1.0
         determinant_data = np.array(data)
         #find the number of variables
         num_var = determinant_data.shape[1]
 
         #calc is the choose the factor loadings
-        calc = np.abs(np.sqrt(1/num_var)) - 0.1
+        calc = np.abs(np.sqrt(1/num_var))
 
         #cov_mat is the covariance matrix of the data
         cov_mat = np.cov(determinant_data.T)
 
         #perform PCA on the covariance matrix
         pca = PCA()
-        transformed_data = pca.fit(cov_mat).transform(cov_mat)
+        pca.fit(cov_mat)
 
         # kaiser criterion : Components with eigen_values > 1.0 should be retained
-        selected_components = np.argwhere(pca.explained_variance_>1.0).flatten()
+        selected_components = np.argwhere(pca.explained_variance_>cut_off).flatten()
         selected_vr = pca.explained_variance_ratio_[selected_components]
 
         # second criterion : Among selected components, retain those with proportion of variance  > 10%
@@ -106,22 +110,23 @@ class HealthScores():
         self.n = len(selected_components)
 
         #Print explained variance
-        if explain_var_dfilepath != None:
-            self.explain_var(pca, per_dom_filepath=explain_var_dfilepath, domain=dom_data[0])
-        else:
-            self.explain_var(pca)
-
-        transformed_data = transformed_data[:self.n,:self.n]
+        #if explain_var_dfilepath != None:
+        #    self.explain_var(pca, per_dom_filepath=explain_var_dfilepath, domain=dom_data[0])
+        #else:
+        #    self.explain_var(pca)
 
         #weights assigned to each pc
-        weights = pca.explained_variance_ratio_/np.sum(pca.explained_variance_ratio_)
+        weights = np.exp((np.log(pca.explained_variance_) - np.log(logsumexp(pca.explained_variance_[:self.n]))))
+
+        weights = weights[:self.n]
 
         #choose only the pc's who satisfies the constraint
-        self.var_load = pca.components_
+        self.var_load = pca.components_.T[:, :self.n]
         self.var_load[self.var_load > calc] = 0
 
         #scores assigned to each component
-        factor_scores = weights @ self.var_load
+        # factor_scores = weights @ self.var_load
+        factor_scores = self.var_load @ weights
 
         #calculate the health score for every town
         health_status = np.array([determinant_data @ factor_scores]).T
@@ -152,22 +157,23 @@ class HealthScores():
     def calc_corr_mat(self, A):
         return np.corrcoef(A, rowvar = False)
 
-    def calc_loadings(self):
-        
+    def calc_loadings(self): 
         #print table of indicator variable loadings
         load_table = []
         for i in range(self.n):
-            load_table.append(self.var_load[:, i]) 
+            load_table.append(self.var_load[:, i])
+        features = np.array([self.extract_features()]).T
+        load_table = np.array([*load_table]).T
+        
+        pc_headers = ['Feature']
+        for i in range(0,self.n):
+            pc_headers.append('pc' + str(i+1))
 
-        features = self.extract_features()
-        loadings = zip(features, *load_table)
-        pc_headers = ['pc1', 'pc2', 'pc3', 'pc4', 'pc5']
-        headers = ['Feature'] + pc_headers[:self.n]
+        load_table = np.concatenate((features, load_table), axis = 1)
 
-        with open(self.loadings_file, "w", newline="") as f:
-            writer = csv.writer(f)
-            writer.writerow(headers)
-            writer.writerows(loadings)
+        df = pd.DataFrame(data=load_table, columns = pc_headers)
+        df.set_index('Feature',inplace=True)
+        df.to_csv(self.loadings_file)
     
     def load_domains(self):
         columns = self.extract_features()
@@ -306,7 +312,6 @@ class HealthScores():
 
     def explain_var(self, pca, per_dom_filepath=None, domain = None):
         var = pca.explained_variance_ratio_
-        
         if per_dom_filepath==None:
             features = self.extract_features()
             variances = list(zip(features, var))
@@ -322,12 +327,13 @@ class HealthScores():
                 writer.writerow(['Feature', 'Eigen value (%)'])
                 writer.writerows(variances)
             
-def main():   
+def main():
+     
     health_obj = HealthScores(cols_filepath="data/health_determinants.csv", data_filepath="data/determinant_data_std.csv",\
        pca_filepath = "output/pca_determinant_std.csv", loadings_filepath="output/loadings_determinant_std.csv", domain_filepath="output/pca_domains_std.csv",\
            corrmat_filepath = "output/correlation_matrix_determinant.csv", pvalue_filepath = "output/p_values_determinant.csv", variance_filepath="output/variance_determinant_std.csv")
     health_obj.calc_pca(write=True)
-    health_obj.calc_loadings()  
+    health_obj.calc_loadings() 
     health_obj.score_per_domain(VER = 'std')
     health_obj.write_corr_mat()
     health_obj.write_p_vales()
@@ -336,7 +342,7 @@ def main():
     health_obj.write_significant_correlations(health_obj.corrmat_file, health_obj.pvalue_file, 'output/significant_correlations_determinant.csv')
     for d in health_obj.domains:
         health_obj.write_significant_correlations('output/correlation_matrix_'+ d + '.csv', 'output/p_values_'+d+'.csv', 'output/significant_correlations_'+d+'.csv')
-        
+     
     health_obj = HealthScores(cols_filepath="data/health_determinants.csv", data_filepath="data/determinant_data_mn.csv",\
        pca_filepath = "output/pca_determinant_mn.csv", loadings_filepath="output/loadings_determinant_mn.csv", domain_filepath="output/pca_domains_mn.csv",\
         variance_filepath="output/variance_determinant_mn.csv")

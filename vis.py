@@ -186,9 +186,9 @@ def main():
     visualize_domains("output/pca_domains_std.csv", 5, 'STD')
     visualize_domains("output/pca_domains_mn.csv", 5, 'MN')
         
-    compare_results('output/pca_determinant_mn.csv', 'output/pca_determinant_std.csv', 'visualizations/result_comparison_determinant')
-    compare_results('output/pca_all_mn.csv', 'output/pca_all_std.csv', 'visualizations/result_comparison_all')
-    compare_results('output/pca_outcome_mn.csv', 'output/pca_outcome_std.csv', 'visualizations/result_comparison_outcome')
+    compare_results('output/pca_determinant_mn.csv', 'output/pca_determinant_std.csv', 'visualizations/result_comparison_determinant', 'Determinant')
+    compare_results('output/pca_all_mn.csv', 'output/pca_all_std.csv', 'visualizations/result_comparison_all', 'All')
+    compare_results('output/pca_outcome_mn.csv', 'output/pca_outcome_std.csv', 'visualizations/result_comparison_outcome', 'Outcome')
     compare_results_per_domain('output/pca_domains_mn.csv', 'output/pca_domains_std.csv', 'visualizations/result_comparison_domain')
 
     visualize_pca_determinants('output/pca_determinant_std.csv','output/pca_determinant_mn.csv','output/pca_all_std.csv','output/pca_all_mn.csv',3,'visualizations/pca_high_low_3.png')
@@ -216,15 +216,17 @@ def value_to_color(val):
             res = palette[255]
     return res
 
-def compare_results(cov_file, corr_file, write_file):
-    cov = pd.read_csv(cov_file, index_col=0, names = ['index','COV'])
-    corr = pd.read_csv(corr_file, index_col=0, names = ['index','CORR'])
-    comp = cov.join(corr, on=['index'], how = 'inner')
+def compare_results(cov_file, corr_file, write_file, sub_set):
+    cov = pd.read_csv(cov_file, index_col=0)
+    cov.rename(columns={'Health Score':'COV'}, inplace=True)
+    corr = pd.read_csv(corr_file, index_col=0)
+    corr.rename(columns={'Health Score':'CORR'}, inplace=True)
+    comp = cov.join(corr, on=['Town'], how = 'inner')
 
     fig = plt.figure(figsize=(10,10))
     
     plt.scatter(comp['COV'], comp['CORR'])
-    plt.title('Comparison of Covariance and Correlation Matrix PCA Results for Determinant Subset')
+    plt.title('Comparison of Covariance and Correlation Matrix PCA Results for '+sub_set+' Subset')
     plt.xlim(-0.02,1.02)
     plt.ylim(-0.02,1.02)
     plt.xlabel('Covariance Matrix Results')

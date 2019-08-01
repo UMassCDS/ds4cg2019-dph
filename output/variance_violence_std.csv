@@ -1,4 +1,4 @@
 Feature,Eigen value (%)
-no_vehicle_avail_%,0.9584494887567703
-below_poverty_level_%,0.041550511243229726
-exp_perpupil_USD,1.0364702989702493e-32
+crimes_against_persons_%,0.9584494887567703
+crimes_against_property_%,0.041550511243229726
+crimes_against_society_%,1.0364702989702493e-32

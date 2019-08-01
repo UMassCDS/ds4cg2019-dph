@@ -221,7 +221,6 @@ class HealthScores():
         df.set_index('index', inplace=True)
 
         df.to_csv(self.domain_file)
-        
 
     def write_corr_mat(self):
         A = self.calc_corr_mat(self.load_data())
@@ -287,6 +286,26 @@ class HealthScores():
             df = pd.DataFrame(data = pvals, columns = headers)
             df.set_index("\\", inplace = True)
             df.to_csv('output/p_values_'+d+'.csv')
+    
+    def write_significant_correlations(self, cm_file, pval_file, write_file):
+        cm = pd.read_csv(cm_file, index_col = 0)
+        feat = list(cm)
+        cm = np.array(cm)
+        pval = np.array(pd.read_csv(pval_file, index_col = 0))
+
+        cm[np.abs(cm) < 0.8] = 0
+        cm[pval > 0.05] = 0
+        cm[cm == 1] = 0
+
+        index = np.array([feat]).T
+        headers = ["\\"] + feat
+        cm = np.concatenate((index, cm), axis = 1)
+
+        df = pd.DataFrame(data = cm, columns = headers)
+        df.set_index("\\", inplace = True)
+        df.to_csv(write_file)
+
+
 
     def explain_var(self, pca, per_dom_filepath=None):
         var = pca.explained_variance_ratio_
@@ -307,8 +326,10 @@ class HealthScores():
 def main():   
     health_obj = HealthScores(cols_filepath="data/health_determinants.csv", data_filepath="data/determinant_data_std.csv",\
        pca_filepath = "output/pca_determinant_std.csv", loadings_filepath="output/loadings_determinant_std.csv", domain_filepath="output/pca_domains_std.csv",\
-           corrmat_filepath = "output/correlation_matrix_determinant.csv", pvalue_filepath = "output/p_values_determinant.csv", 
-           variance_filepath="output/variance_determinant_std.csv")
+           corrmat_filepath = "output/correlation_matrix_determinant.csv", pvalue_filepath = "output/p_values_determinant.csv", variance_filepath="output/variance_determinant_std.csv")
+    health_obj.write_significant_correlations(health_obj.corrmat_file, health_obj.pvalue_file, 'output/significant_correlations_determinant.csv')
+    for d in health_obj.domains:
+        health_obj.write_significant_correlations('output/correlation_matrix_'+ d + '.csv', 'output/p_values_'+d+'.csv', 'output/significant_correlations_'+d+'.csv')
     health_obj.calc_pca(write=True, explain_var=True)
     health_obj.calc_loadings()  
     health_obj.score_per_domain()
@@ -333,6 +354,7 @@ def main():
     health_obj.calc_loadings()
     health_obj.write_corr_mat()
     health_obj.write_p_vales()
+    health_obj.write_significant_correlations(health_obj.corrmat_file, health_obj.pvalue_file, 'output/significant_correlations_outcome.csv')
     
     health_obj = HealthScores(cols_filepath="data/health_outcomes.csv", data_filepath="data/outcome_data_mn.csv",\
        pca_filepath = "output/pca_outcome_mn.csv", loadings_filepath="output/loadings_outcome_mn.csv",\
@@ -347,6 +369,7 @@ def main():
     health_obj.calc_loadings()
     health_obj.write_corr_mat()
     health_obj.write_p_vales()
+    health_obj.write_significant_correlations(health_obj.corrmat_file, health_obj.pvalue_file, 'output/significant_correlations_all.csv')
 
     health_obj = HealthScores(cols_filepath="data/all_data.csv", data_filepath="data/all_data_mn.csv",\
        pca_filepath = "output/pca_all_mn.csv", loadings_filepath="output/loadings_all_mn.csv",\

@@ -71,7 +71,7 @@ class HealthScores():
         towns = list(data.index)
         return towns
 
-    def calc_pca(self, write=True, dom_data=(None, None)):
+    def calc_pca(self, write=True, dom_data=(None, None), explain_var_dfilepath=None):
         """
         Method to calculate factor scores
         """
@@ -106,7 +106,10 @@ class HealthScores():
         self.n = len(selected_components)
 
         #Print explained variance
-        self.explain_var(pca)
+        if explain_var_dfilepath != None:
+            self.explain_var(pca, per_dom_filepath=explain_var_dfilepath)
+        else:
+            self.explain_var(pca)
 
         transformed_data = transformed_data[:self.n,:self.n]
 
@@ -203,8 +206,9 @@ class HealthScores():
         domain_scores = []
         for dom in domains_by_no:
             domain_data = determinant_data[domains_by_no[dom]]
-            domain_scores.append(self.calc_pca(write=False, dom_data=(True, domain_data)))
+            domain_scores.append(self.calc_pca(write=False, dom_data=(True, domain_data), explain_var_dfilepath='output/variance_'+str(dom)+'_std.csv'))
 
+        
         domain_scores = np.array(domain_scores).T
         avg_dom = np.array([[round(x,2) for x in np.average(domain_scores, axis =1)]]).T
         domain_scores = np.concatenate((domain_scores, avg_dom), axis = 1)
@@ -217,7 +221,8 @@ class HealthScores():
         df.set_index('index', inplace=True)
 
         df.to_csv(self.domain_file)
-    
+        
+
     def write_corr_mat(self):
         A = self.calc_corr_mat(self.load_data())
         feat = np.array([self.extract_features()]).T
@@ -283,12 +288,18 @@ class HealthScores():
             df.set_index("\\", inplace = True)
             df.to_csv('output/p_values_'+d+'.csv')
 
-    def explain_var(self, pca):
+    def explain_var(self, pca, per_dom_filepath=None):
         var = pca.explained_variance_ratio_
         features = self.extract_features()
         variances = list(zip(features, var))
         
-        with open(self.var_file, "w", newline="") as f:
+        if per_dom_filepath==None:
+            with open(self.var_file, "w", newline="") as f:
+                writer = csv.writer(f)
+                writer.writerow(['Feature', 'Eigen value (%)'])
+                writer.writerows(variances)
+        else:
+            with open(per_dom_filepath, "w", newline="") as f:
                 writer = csv.writer(f)
                 writer.writerow(['Feature', 'Eigen value (%)'])
                 writer.writerows(variances)
@@ -296,8 +307,9 @@ class HealthScores():
 def main():   
     health_obj = HealthScores(cols_filepath="data/health_determinants.csv", data_filepath="data/determinant_data_std.csv",\
        pca_filepath = "output/pca_determinant_std.csv", loadings_filepath="output/loadings_determinant_std.csv", domain_filepath="output/pca_domains_std.csv",\
-           corrmat_filepath = "output/correlation_matrix_determinant.csv", pvalue_filepath = "output/p_values_determinant.csv", variance_filepath="output/variance_determinant_std.csv")
-    health_obj.calc_pca(write=True)
+           corrmat_filepath = "output/correlation_matrix_determinant.csv", pvalue_filepath = "output/p_values_determinant.csv", 
+           variance_filepath="output/variance_determinant_std.csv")
+    health_obj.calc_pca(write=True, explain_var=True)
     health_obj.calc_loadings()  
     health_obj.score_per_domain()
     health_obj.write_corr_mat()
@@ -305,10 +317,11 @@ def main():
     health_obj.write_corr_mat_per_dom()
     health_obj.write_p_values_per_dom()
     
+    
     health_obj = HealthScores(cols_filepath="data/health_determinants.csv", data_filepath="data/determinant_data_mn.csv",\
        pca_filepath = "output/pca_determinant_mn.csv", loadings_filepath="output/loadings_determinant_mn.csv", domain_filepath="output/pca_domains_mn.csv",\
         variance_filepath="output/variance_determinant_mn.csv")
-    health_obj.calc_pca(write=True)
+    health_obj.calc_pca(write=True, explain_var=True)
     health_obj.calc_loadings()
     health_obj.score_per_domain()
     
@@ -340,6 +353,6 @@ def main():
        variance_filepath="output/variance_all_mn.csv")
     health_obj.calc_pca(write=True)
     health_obj.calc_loadings()
-
+    
 if __name__ == '__main__':
     main()

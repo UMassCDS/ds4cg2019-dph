@@ -5,12 +5,14 @@ from sklearn.preprocessing import MinMaxScaler
 import csv
 from scipy.stats import pearsonr
 from scipy.misc import logsumexp
+import collections
+from factor_analyzer import FactorAnalyzer
 
 class HealthScores():
     '''
     Get healthscores for all towns
     '''
-    def __init__(self, cols_filepath, data_filepath, pca_filepath, loadings_filepath=None, domain_filepath=None, corrmat_filepath = None, pvalue_filepath = None, variance_filepath=None):
+    def __init__(self, cols_filepath, data_filepath, pca_filepath, loadings_filepath=None, domain_filepath=None, corrmat_filepath = None, pvalue_filepath = None, variance_filepath=None, sigcorr_filepath=None, decorrelated_filepath = None):
         '''
         Initialize variables
         '''
@@ -22,6 +24,8 @@ class HealthScores():
         self.corrmat_file = corrmat_filepath
         self.pvalue_file = pvalue_filepath
         self.var_file = variance_filepath
+        self.sigcorr_file = sigcorr_filepath
+        self.decorrelated_file = decorrelated_filepath
 
         self.domains = {'built_environment':['no_vehicle_avail_%', 'comm_car_%', 'comm_carpool_%', 'comm_bus_%', 'comm_walk_%',\
                     'comm_cycle_%', 'comm_taxi_%', 'comm_wfh_%','tobbaco_retailers_2019_%', 'liquor_per1000', 'supermarket_per1000', 
@@ -52,13 +56,14 @@ class HealthScores():
                     'violence':['crimes_against_persons_%', 'crimes_against_property_%', 'crimes_against_society_%']}
         self.var_load = None
         self.n = None
+        self.pca = None
         
     def extract_features(self):
         """
         To extract the column headers so we can map PC components to relevant factors
         """
         data = pd.read_csv(self.read_cols, index_col=0)
-        # columns = [x for x in enumerate(data.columns, 1)]
+        # columns = [x for x in enumerate(data.columns)]
         return list(data.columns)
 
     def extract_towns(self):
@@ -95,12 +100,12 @@ class HealthScores():
         cov_mat = np.cov(determinant_data.T)
 
         #perform PCA on the covariance matrix
-        pca = PCA()
-        pca.fit(cov_mat)
+        self.pca = PCA()
+        self.pca.fit(cov_mat)
 
         # kaiser criterion : Components with eigen_values > 1.0 should be retained
-        selected_components = np.argwhere(pca.explained_variance_>cut_off).flatten()
-        selected_vr = pca.explained_variance_ratio_[selected_components]
+        selected_components = np.argwhere(self.pca.explained_variance_>cut_off).flatten()
+        selected_vr = self.pca.explained_variance_ratio_[selected_components]
 
         # second criterion : Among selected components, retain those with proportion of variance  > 10%
         mod_idxs = np.argwhere(selected_vr.flatten()>0.1)
@@ -116,16 +121,15 @@ class HealthScores():
         #    self.explain_var(pca)
 
         #weights assigned to each pc
-        weights = np.exp((np.log(pca.explained_variance_) - np.log(logsumexp(pca.explained_variance_[:self.n]))))
+        weights = np.exp((np.log(self.pca.explained_variance_) - np.log(logsumexp(self.pca.explained_variance_[:self.n]))))
 
         weights = weights[:self.n]
 
         #choose only the pc's who satisfies the constraint
-        self.var_load = pca.components_.T[:, :self.n]
+        self.var_load = self.pca.components_.T[:, :self.n]
         self.var_load[self.var_load > calc] = 0
 
         #scores assigned to each component
-        # factor_scores = weights @ self.var_load
         factor_scores = self.var_load @ weights
 
         #calculate the health score for every town
@@ -264,7 +268,7 @@ class HealthScores():
             pvals.append(row)
         return np.array(pvals)
     
-    def write_p_vales(self):
+    def write_p_values(self):
         data = self.load_data()
         pvals = self.p_values(data)
         feat = self.extract_features()
@@ -292,7 +296,7 @@ class HealthScores():
             df.set_index("\\", inplace = True)
             df.to_csv('output/p_values_'+d+'.csv')
     
-    def write_significant_correlations(self, cm_file, pval_file, write_file):
+    def write_significant_correlations(self, cm_file, pval_file):
         cm = pd.read_csv(cm_file, index_col = 0)
         feat = list(cm)
         cm = np.array(cm)
@@ -308,7 +312,7 @@ class HealthScores():
 
         df = pd.DataFrame(data = cm, columns = headers)
         df.set_index("\\", inplace = True)
-        df.to_csv(write_file)
+        df.to_csv(self.sigcorr_file)
 
     def explain_var(self, pca, per_dom_filepath=None, domain = None):
         var = pca.explained_variance_ratio_
@@ -326,60 +330,119 @@ class HealthScores():
                 writer = csv.writer(f)
                 writer.writerow(['Feature', 'Eigen value (%)'])
                 writer.writerows(variances)
+    
+    def correlation_analysis(self):
+        fa = FactorAnalyzer(n_factors = self.n, rotation='varimax')
+        inp = pd.read_csv(self.data, index_col=0)
+        fa.fit(inp)
+        magnitude = fa.get_communalities()
+
+        feat = self.extract_features()
+        mag_dict = {}
+        for t,f in enumerate(feat):
+            mag_dict[f] = magnitude[t]
+        
+        sorted_mag = sorted(mag_dict.items(), key=lambda kv:kv[1], reverse=True)
+        
+        sig_corr = pd.read_csv(self.sigcorr_file, index_col=0)
+
+        columns_to_drop = []
+
+        for item in sorted_mag:
+            if item[0] not in columns_to_drop:
+                col = np.array(sig_corr[item[0]])
+                location = list(np.where(col != 0))[0]
+                for loc in location:
+                    if loc not in columns_to_drop:
+                        columns_to_drop.append(str(loc))
+        decorrelated = inp.drop(columns=columns_to_drop)
+        column_num = list(map(int, list(decorrelated)))
+        column_name = list(np.array(self.extract_features())[column_num])
+        decorrelated_names = decorrelated.set_axis(column_name, axis = 1, inplace=False)
+        decorrelated_names.set_axis(self.extract_towns(), axis = 0, inplace=True)
+        decorrelated.to_csv(self.decorrelated_file + '.csv')
+        decorrelated_names.to_csv(self.decorrelated_file + '_columns.csv')
+
             
 def main():
-     
+    
     health_obj = HealthScores(cols_filepath="data/health_determinants.csv", data_filepath="data/determinant_data_std.csv",\
        pca_filepath = "output/pca_determinant_std.csv", loadings_filepath="output/loadings_determinant_std.csv", domain_filepath="output/pca_domains_std.csv",\
-           corrmat_filepath = "output/correlation_matrix_determinant.csv", pvalue_filepath = "output/p_values_determinant.csv", variance_filepath="output/variance_determinant_std.csv")
+           corrmat_filepath = "output/correlation_matrix_determinant.csv", pvalue_filepath = "output/p_values_determinant.csv", variance_filepath="output/variance_determinant_std.csv",\
+               sigcorr_filepath= "output/significant_correlations_determinant.csv", decorrelated_filepath="data/decorrelated_determinant_data_std")
+    
     health_obj.calc_pca(write=True)
     health_obj.calc_loadings() 
     health_obj.score_per_domain(VER = 'std')
     health_obj.write_corr_mat()
-    health_obj.write_p_vales()
+    health_obj.write_p_values()
     health_obj.write_corr_mat_per_dom()
     health_obj.write_p_values_per_dom()
-    health_obj.write_significant_correlations(health_obj.corrmat_file, health_obj.pvalue_file, 'output/significant_correlations_determinant.csv')
+    health_obj.write_significant_correlations(health_obj.corrmat_file, health_obj.pvalue_file)
+    '''
     for d in health_obj.domains:
         health_obj.write_significant_correlations('output/correlation_matrix_'+ d + '.csv', 'output/p_values_'+d+'.csv', 'output/significant_correlations_'+d+'.csv')
-     
+    '''
+    health_obj.correlation_analysis()
+
     health_obj = HealthScores(cols_filepath="data/health_determinants.csv", data_filepath="data/determinant_data_mn.csv",\
        pca_filepath = "output/pca_determinant_mn.csv", loadings_filepath="output/loadings_determinant_mn.csv", domain_filepath="output/pca_domains_mn.csv",\
-        variance_filepath="output/variance_determinant_mn.csv")
+        variance_filepath="output/variance_determinant_mn.csv", sigcorr_filepath="output/significant_correlations_determinant.csv",\
+            decorrelated_filepath='data/decorrelated_determinant_data_mn')
     health_obj.calc_pca(write=True)
     health_obj.calc_loadings()
     health_obj.score_per_domain(VER = 'mn')
-    
+    health_obj.correlation_analysis()
+
     health_obj = HealthScores(cols_filepath="data/health_outcomes.csv", data_filepath="data/outcome_data_std.csv",\
        pca_filepath = "output/pca_outcome_std.csv", loadings_filepath="output/loadings_outcome_std.csv",\
        corrmat_filepath = "output/correlation_matrix_outcome.csv", pvalue_filepath = "output/p_values_outcome.csv",\
-       variance_filepath="output/variance_outcome_std.csv")
+       variance_filepath="output/variance_outcome_std.csv", sigcorr_filepath='output/significant_correlations_outcome.csv',\
+           decorrelated_filepath='data/decorrelated_outcome_data_std')
     health_obj.calc_pca(write=True)
     health_obj.calc_loadings()
     health_obj.write_corr_mat()
-    health_obj.write_p_vales()
-    health_obj.write_significant_correlations(health_obj.corrmat_file, health_obj.pvalue_file, 'output/significant_correlations_outcome.csv')
+    health_obj.write_p_values()
+    health_obj.write_significant_correlations(health_obj.corrmat_file, health_obj.pvalue_file)
+    health_obj.correlation_analysis()
     
     health_obj = HealthScores(cols_filepath="data/health_outcomes.csv", data_filepath="data/outcome_data_mn.csv",\
        pca_filepath = "output/pca_outcome_mn.csv", loadings_filepath="output/loadings_outcome_mn.csv",\
-        variance_filepath="output/variance_outcome_mn.csv")
+        variance_filepath="output/variance_outcome_mn.csv", sigcorr_filepath='output/significant_correlations_outcome.csv',\
+            decorrelated_filepath='data/decorrelated_outcome_data_mn')
     health_obj.calc_pca(write=True)
-    health_obj.calc_loadings()    
+    health_obj.calc_loadings()
+    health_obj.correlation_analysis()
 
     health_obj = HealthScores(cols_filepath="data/all_data.csv", data_filepath="data/all_data_std.csv",\
        pca_filepath = "output/pca_all_std.csv", loadings_filepath="output/loadings_all_std.csv", corrmat_filepath = "output/correlation_matrix_all.csv",\
-           pvalue_filepath = "output/p_values_all.csv", variance_filepath="output/variance_all_std.csv")
+           pvalue_filepath = "output/p_values_all.csv", variance_filepath="output/variance_all_std.csv", sigcorr_filepath="output/significant_correlations_all.csv",\
+               decorrelated_filepath="data/decorrelated_all_data_std")
     health_obj.calc_pca(write=True)
     health_obj.calc_loadings()
     health_obj.write_corr_mat()
-    health_obj.write_p_vales()
-    health_obj.write_significant_correlations(health_obj.corrmat_file, health_obj.pvalue_file, 'output/significant_correlations_all.csv')
+    health_obj.write_p_values()
+    health_obj.write_significant_correlations(health_obj.corrmat_file, health_obj.pvalue_file)
+    health_obj.correlation_analysis()
 
     health_obj = HealthScores(cols_filepath="data/all_data.csv", data_filepath="data/all_data_mn.csv",\
        pca_filepath = "output/pca_all_mn.csv", loadings_filepath="output/loadings_all_mn.csv",\
-       variance_filepath="output/variance_all_mn.csv")
+       variance_filepath="output/variance_all_mn.csv", sigcorr_filepath= "output/significant_correlations_all.csv", decorrelated_filepath="data/decorrelated_all_data_mn")
     health_obj.calc_pca(write=True)
     health_obj.calc_loadings()
+    health_obj.correlation_analysis()
+    
+    '''
+    health_obj = HealthScores(cols_filepath="data/decorrelated_determinant_data_std_columns.csv", data_filepath="data/decorrelated_determinant_data_std.csv",\
+       pca_filepath = "output/pca_decorrelated_determinant_std.csv", loadings_filepath="output/loadings_decorrelated_determinant_std.csv", \
+           corrmat_filepath = "output/correlation_matrix_decorrelated_determinant.csv", pvalue_filepath = "output/p_values_decorrelated_determinant.csv",\
+               sigcorr_filepath= "output/significant_correlations_decorrelated_determinant.csv")
+    health_obj.calc_pca(write=True)
+    health_obj.calc_loadings()
+    health_obj.write_corr_mat()
+    health_obj.write_p_values()
+    health_obj.write_significant_correlations(health_obj.corrmat_file, health_obj.pvalue_file)
+    '''
     
 if __name__ == '__main__':
     main()

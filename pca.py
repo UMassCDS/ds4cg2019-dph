@@ -177,7 +177,7 @@ class HealthScores():
             factors = pd.DataFrame(sorted_mag, columns=['Feature','Importance'])
             factors.to_csv(self.fa_file, index=False)
         
-        return sorted_mag
+        return inp, sorted_mag
 
     def factor_analysis_perdomain(self, write=False):
         domain_data = self.load_domains()
@@ -185,6 +185,8 @@ class HealthScores():
         column_headers = dict((x, y) for x, y in columns)
         for data in domain_data:
             col_nums = list(domain_data[data].columns)
+            print(col_nums)
+            
             inp = domain_data[data]
             fa = FactorAnalyzer(n_factors = self.n, rotation='varimax')
 
@@ -203,8 +205,11 @@ class HealthScores():
 
             if write==True:
                 factors = pd.DataFrame(sorted_mag, columns=['Feature','Importance'])
-                factors.to_csv('output/fa_'+str(data)+'_'+str(self.VER)+'.csv', index=False)
-    
+                if self.DC:
+                    factors.to_csv('output/fa_decorrelated_'+str(data)+'_'+str(self.VER)+'.csv', index=False)
+                else:
+                    factors.to_csv('output/fa_'+str(data)+'_'+str(self.VER)+'.csv', index=False)
+
 
     def load_data(self):
         data = pd.read_csv(self.data, index_col=0)
@@ -389,7 +394,7 @@ class HealthScores():
         df.to_csv(write_file)
     
     def correlation_analysis(self):
-        sorted_mag = self.factor_analysis()
+        inp, sorted_mag = self.factor_analysis()
         sig_corr = pd.read_csv(self.sigcorr_file, index_col=0)
 
         columns_to_drop = []
@@ -496,7 +501,7 @@ DC_DETERMINANT_STD = {'cols_filepath':"data/decorrelated_determinant_data_std_co
                         'domain_filepath':"output/pca_decorrelated_domains_std.csv",
                         'corrmat_filepath':"output/correlation_matrix_decorrelated_determinant.csv",
                         'pvalue_filepath':"output/p_values_decorrelated_determinant.csv",
-                        'fa_filepath':None,
+                        'fa_filepath':'output/fa_decorrelated_determinant_std.csv',
                         'sigcorr_filepath':"output/significant_correlations_decorrelated_determinant.csv",
                         'decorrelated_filepath':None,
                         'VER':'std',
@@ -509,7 +514,7 @@ DC_DETERMINANT_MN = {'cols_filepath':"data/decorrelated_determinant_data_mn_colu
                     'domain_filepath':"output/pca_decorrelated_domains_mn.csv",
                     'corrmat_filepath':"output/correlation_matrix_decorrelaed_determinant.csv",
                     'pvalue_filepath':"output/p_values_decorrelated_determinant.csv",
-                    'variance_filepath':None, 
+                    'fa_filepath':'output/fa_decorrelated_determinant_mn.csv', 
                     'sigcorr_filepath':"output/significant_correlations_decorrelated_determinant.csv",
                     'decorrelated_filepath':None,
                     'VER':'mn',
@@ -522,7 +527,7 @@ DC_OUTCOME_STD = {'cols_filepath':"data/decorrelated_outcome_data_std_columns.cs
                 'domain_filepath':None,
                 'corrmat_filepath':"output/correlation_matrix_decorrelated_outcome.csv", 
                 'pvalue_filepath':"output/p_values_decorrelated_outcome.csv",
-                'variance_filepath':None, 
+                'fa_filepath':'output/fa_decorrelated_outcome_std.csv', 
                 'sigcorr_filepath':'output/significant_correlations_decorrelated_outcome.csv',
                 'decorrelated_filepath':None,
                 'VER':'std',
@@ -535,7 +540,7 @@ DC_OUTCOME_MN = {'cols_filepath':"data/decorrelated_outcome_data_mn_columns.csv"
                 'domain_filepath':None,
                 'corrmat_filepath':"output/correlation_matrix_decorrelated_outcome.csv", 
                 'pvalue_filepath':"output/p_values_decorrelated_outcome.csv",
-                'variance_filepath':None,
+                'fa_filepath':'output/fa_decorrelated_outcome_mn.csv',
                 'sigcorr_filepath':'output/significant_correlations_decorrelated_outcome.csv',
                 'decorrelated_filepath':None,
                 'VER':'mn',
@@ -548,7 +553,7 @@ DC_ALL_STD = {'cols_filepath':"data/decorrelated_all_data_std_columns.csv",
             'domain_filepath':None,
             'corrmat_filepath':"output/correlation_matrix_decorrelated_all.csv",
             'pvalue_filepath':"output/p_values_decorrelated_all.csv", 
-            'variance_filepath':None,
+            'fa_filepath':'output/fa_decorrelated_all_std.csv',
             'sigcorr_filepath':"output/significant_correlations_decorrelated_all.csv",
             'decorrelated_filepath':None,
             'VER':'std',
@@ -561,7 +566,7 @@ DC_ALL_MN = {'cols_filepath':"data/decorrelated_all_data_mn_columns.csv",
             'domain_filepath':None,
             'corrmat_filepath':"output/correlation_matrix_decorrelated_all.csv",
             'pvalue_filepath':"output/p_values_decorrealted_all.csv",
-            'variance_filepath':None,
+            'fa_filepath':'output/fa_decorrelated_all_mn.csv',
             'sigcorr_filepath':"output/significant_correlations_decorrelated_all.csv", 
             'decorrelated_filepath': None,
             'VER':'mn',
@@ -625,6 +630,7 @@ def generate_decorrelated_results():
     health_obj = HealthScores(DC_DETERMINANT_STD)
     health_obj.calc_pca(write=True)
     health_obj.calc_loadings()
+    health_obj.factor_analysis(write=True)
     health_obj.score_per_domain()
     health_obj.factor_analysis_perdomain(write=True)
     health_obj.write_corr_mat()
@@ -638,10 +644,13 @@ def generate_decorrelated_results():
     health_obj = HealthScores(DC_DETERMINANT_MN)
     health_obj.calc_pca(write=True)
     health_obj.calc_loadings()
+    health_obj.factor_analysis(write=True)
     health_obj.score_per_domain()
+    health_obj.factor_analysis_perdomain(write=True)
     
     health_obj = HealthScores(DC_OUTCOME_STD)
     health_obj.calc_pca(write=True)
+    health_obj.factor_analysis(write=True)
     health_obj.calc_loadings()
     health_obj.write_corr_mat()
     health_obj.write_p_values()
@@ -650,10 +659,13 @@ def generate_decorrelated_results():
     health_obj = HealthScores(DC_OUTCOME_MN)
     health_obj.calc_pca(write=True)
     health_obj.calc_loadings()
+    health_obj.factor_analysis(write=True)
+
 
     health_obj = HealthScores(DC_ALL_STD)
     health_obj.calc_pca(write=True)
     health_obj.calc_loadings()
+    health_obj.factor_analysis(write=True)
     health_obj.write_corr_mat()
     health_obj.write_p_values()
     health_obj.write_significant_correlations(health_obj.corrmat_file, health_obj.pvalue_file, health_obj.sigcorr_file)
@@ -661,6 +673,8 @@ def generate_decorrelated_results():
     health_obj = HealthScores(DC_ALL_MN)
     health_obj.calc_pca(write=True)
     health_obj.calc_loadings()
+    health_obj.factor_analysis(write=True)
+
 
 def main():
     generate_results()

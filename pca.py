@@ -181,35 +181,38 @@ class HealthScores():
 
     def factor_analysis_perdomain(self, write=False):
         domain_data = self.load_domains()
-        columns = [x for x in enumerate(pd.read_csv(self.read_cols).columns)]
-        column_headers = dict((x, y) for x, y in columns)
-        for data in domain_data:
-            col_nums = list(domain_data[data].columns)
-            print(col_nums)
-            
-            inp = domain_data[data]
+        true_num = list(pd.read_csv(self.data, index_col=0))
+        for d in self.domains:
+            curr = domain_data[d]
+            col = list(curr)
+            ind = []
+            for c in col:
+                ind.append(true_num.index(c))
+            index_num = list(map(int, ind))
+            column_name = list(np.array(self.extract_features())[index_num])
+
+            inp = domain_data[d]
             fa = FactorAnalyzer(n_factors = self.n, rotation='varimax')
 
             try:
                 fa.fit(inp)
             except:
-                print('Data from '+str(data)+' domain cannot be factorized as it results in a singular matrix.')
+                print('Data from '+str(d)+' domain cannot be factorized as it results in a singular matrix.')
                 continue
             magnitude = fa.get_communalities()
 
             mag_dict={}
-            for i, number in enumerate(col_nums):
-                mag_dict[column_headers[int(number)]] = magnitude[i]
+            for i,_ in enumerate(column_name):
+                mag_dict[column_name[i]] = magnitude[i]
 
             sorted_mag = sorted(mag_dict.items(), key=lambda kv:kv[1], reverse=True)
 
             if write==True:
                 factors = pd.DataFrame(sorted_mag, columns=['Feature','Importance'])
                 if self.DC:
-                    factors.to_csv('output/fa_decorrelated_'+str(data)+'_'+str(self.VER)+'.csv', index=False)
+                    factors.to_csv('output/fa_decorrelated_'+str(d)+'_'+str(self.VER)+'.csv', index=False)
                 else:
-                    factors.to_csv('output/fa_'+str(data)+'_'+str(self.VER)+'.csv', index=False)
-
+                    factors.to_csv('output/fa_'+str(d)+'_'+str(self.VER)+'.csv', index=False)
 
     def load_data(self):
         data = pd.read_csv(self.data, index_col=0)
@@ -660,7 +663,6 @@ def generate_decorrelated_results():
     health_obj.calc_pca(write=True)
     health_obj.calc_loadings()
     health_obj.factor_analysis(write=True)
-
 
     health_obj = HealthScores(DC_ALL_STD)
     health_obj.calc_pca(write=True)

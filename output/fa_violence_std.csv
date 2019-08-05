@@ -1,4 +1,4 @@
 Feature,Importance
-crimes_against_persons_%,0.9138463624019951
-libraries_%,0.7012147280580114
-crimes_against_property_%,0.08169856979432465
+crimes_against_property_%,0.9138463624019951
+crimes_against_persons_%,0.7012147280580114
+crimes_against_society_%,0.08169856979432465

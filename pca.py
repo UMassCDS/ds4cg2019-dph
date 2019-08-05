@@ -508,8 +508,7 @@ def generate_results():
     health_obj.calc_loadings()
     health_obj.correlation_analysis()
 
-def main():  
-    #generate_results()
+def generate_decorrelated_results():
     health_obj = HealthScores(DC_DETERMINANT_STD)
     health_obj.calc_pca(write=True)
     health_obj.calc_loadings()
@@ -517,6 +516,11 @@ def main():
     health_obj.write_corr_mat()
     health_obj.write_p_values()
     health_obj.write_significant_correlations(health_obj.corrmat_file, health_obj.pvalue_file, health_obj.sigcorr_file)
+
+
+def main():
+    generate_results()
+    #generate_decorrelated_results()
     
 if __name__ == '__main__':
     main()

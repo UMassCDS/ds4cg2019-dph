@@ -8,6 +8,7 @@ from scipy.misc import logsumexp
 import collections
 from factor_analyzer import FactorAnalyzer
 
+
 GLOBAL_DOMAINS = {'built_environment':['no_vehicle_avail_%', 'comm_car_%', 'comm_carpool_%', 'comm_bus_%', 'comm_walk_%',\
                     'comm_cycle_%', 'comm_taxi_%', 'comm_wfh_%','tobbaco_retailers_2019_%', 'liquor_per1000', 'supermarket_per1000', 
                     'food_est_per1000'], 
@@ -51,7 +52,7 @@ class HealthScores():
         self.domain_file = INFO['domain_filepath']
         self.corrmat_file = INFO['corrmat_filepath']
         self.pvalue_file = INFO['pvalue_filepath']
-        self.var_file = INFO['variance_filepath']
+        self.fa_file = INFO['fa_filepath']
         self.sigcorr_file = INFO['sigcorr_filepath']
         self.decorrelated_file = INFO['decorrelated_filepath']
         self.VER = INFO['VER']
@@ -77,21 +78,17 @@ class HealthScores():
         To extract the column headers so we can map PC components to relevant factors
         """
         data = pd.read_csv(self.read_cols, index_col=0)
-        # columns = [x for x in enumerate(data.columns)]
         return list(data.columns)
 
     def extract_towns(self):
         """
         Extract the town names, so that health score can have meaning
-        TODO: FIX FOR ALL PCA
         """
-        # data = pd.read_csv(self.read_cols, index_col=0)
-        # TODO: clean
         data = pd.read_csv('data/health_determinants.csv', index_col=0)
         towns = list(data.index)
         return towns
 
-    def calc_pca(self, write=True, dom_data=(None, None), explain_var_dfilepath=None):
+    def calc_pca(self, write=True, dom_data=(None, None), explain_fa_dfilepath=None):
         """
         Method to calculate factor scores
         """
@@ -130,12 +127,6 @@ class HealthScores():
         if self.n < 1:
             self.n = 1
 
-        #Print explained variance
-        #if explain_var_dfilepath != None:
-        #    self.explain_var(pca, per_dom_filepath=explain_var_dfilepath, domain=dom_data[0])
-        #else:
-        #    self.explain_var(pca)
-
         #weights assigned to each pc
         weights = np.exp((np.log(self.pca.explained_variance_) - np.log(logsumexp(self.pca.explained_variance_[:self.n]))))
 
@@ -166,6 +157,54 @@ class HealthScores():
                 writer.writerows(health_scores)
         
         return scores 
+
+    def factor_analysis(self, write=False):
+        inp = pd.read_csv(self.data, index_col=0)
+        fa = FactorAnalyzer(n_factors = self.n, rotation='varimax')
+        
+        fa.fit(inp)
+        magnitude = fa.get_communalities()
+
+        feat = self.extract_features()
+
+        mag_dict = {}
+        for t,f in enumerate(feat):
+            mag_dict[f] = magnitude[t]
+        
+        sorted_mag = sorted(mag_dict.items(), key=lambda kv:kv[1], reverse=True)
+        
+        if write==True:
+            factors = pd.DataFrame(sorted_mag, columns=['Feature','Importance'])
+            factors.to_csv(self.fa_file, index=False)
+        
+        return sorted_mag
+
+    def factor_analysis_perdomain(self, write=False):
+        domain_data = self.load_domains()
+        columns = [x for x in enumerate(pd.read_csv(self.read_cols).columns)]
+        column_headers = dict((x, y) for x, y in columns)
+        for data in domain_data:
+            col_nums = list(domain_data[data].columns)
+            inp = domain_data[data]
+            fa = FactorAnalyzer(n_factors = self.n, rotation='varimax')
+
+            try:
+                fa.fit(inp)
+            except:
+                print('Data from '+str(data)+' domain cannot be factorized as it results in a singular matrix.')
+                continue
+            magnitude = fa.get_communalities()
+
+            mag_dict={}
+            for i, number in enumerate(col_nums):
+                mag_dict[column_headers[int(number)]] = magnitude[i]
+
+            sorted_mag = sorted(mag_dict.items(), key=lambda kv:kv[1], reverse=True)
+
+            if write==True:
+                factors = pd.DataFrame(sorted_mag, columns=['Feature','Importance'])
+                factors.to_csv('output/fa_'+str(data)+'_'+str(self.VER)+'.csv', index=False)
+    
 
     def load_data(self):
         data = pd.read_csv(self.data, index_col=0)
@@ -231,7 +270,7 @@ class HealthScores():
         for dom in domains_by_no:
             domain_data = determinant_data[domains_by_no[dom]]
             if domain_data.shape[1] > 1:
-                domain_scores.append(self.calc_pca(write=False, dom_data=(dom, domain_data), explain_var_dfilepath='output/variance_'+str(dom) + '_' + self.VER + '.csv'))
+                domain_scores.append(self.calc_pca(write=False, dom_data=(dom, domain_data), explain_fa_dfilepath='output/fa_'+str(dom) + '_' + self.VER + '.csv'))
             else:
                 domain_scores.append([round(x,2) for x in MinMaxScaler().fit_transform(np.array(domain_data)).flatten()])
         
@@ -348,37 +387,9 @@ class HealthScores():
         df = pd.DataFrame(data = cm, columns = headers)
         df.set_index("\\", inplace = True)
         df.to_csv(write_file)
-
-    def explain_var(self, pca, per_dom_filepath=None, domain = None):
-        var = pca.explained_variance_ratio_
-        if per_dom_filepath==None:
-            features = self.extract_features()
-            variances = list(zip(features, var))
-            with open(self.var_file, "w", newline="") as f:
-                writer = csv.writer(f)
-                writer.writerow(['Feature', 'Eigen value (%)'])
-                writer.writerows(variances)
-        else:
-            features = self.domains[domain]
-            variances = list(zip(features, var))
-            with open(per_dom_filepath, "w", newline="") as f:
-                writer = csv.writer(f)
-                writer.writerow(['Feature', 'Eigen value (%)'])
-                writer.writerows(variances)
     
     def correlation_analysis(self):
-        fa = FactorAnalyzer(n_factors = self.n, rotation='varimax')
-        inp = pd.read_csv(self.data, index_col=0)
-        fa.fit(inp)
-        magnitude = fa.get_communalities()
-
-        feat = self.extract_features()
-        mag_dict = {}
-        for t,f in enumerate(feat):
-            mag_dict[f] = magnitude[t]
-        
-        sorted_mag = sorted(mag_dict.items(), key=lambda kv:kv[1], reverse=True)
-        
+        sorted_mag = self.factor_analysis()
         sig_corr = pd.read_csv(self.sigcorr_file, index_col=0)
 
         columns_to_drop = []
@@ -390,6 +401,7 @@ class HealthScores():
                 for loc in location:
                     if loc not in columns_to_drop:
                         columns_to_drop.append(str(loc))
+
         decorrelated = inp.drop(columns=columns_to_drop)
         column_num = list(map(int, list(decorrelated)))
         column_name = list(np.array(self.extract_features())[column_num])
@@ -406,7 +418,7 @@ DETERMINANT_STD = {'cols_filepath':"data/health_determinants.csv",
                     'domain_filepath':"output/pca_domains_std.csv",
                     'corrmat_filepath':"output/correlation_matrix_determinant.csv", 
                     'pvalue_filepath':"output/p_values_determinant.csv", 
-                    'variance_filepath':"output/variance_determinant_std.csv",
+                    'fa_filepath':"output/fa_determinant_std.csv",
                     'sigcorr_filepath':"output/significant_correlations_determinant.csv",
                     'decorrelated_filepath':"data/decorrelated_determinant_data_std",
                     'VER':'std',
@@ -419,7 +431,7 @@ DETERMINANT_MN = {'cols_filepath':"data/health_determinants.csv",
                     'domain_filepath':"output/pca_domains_mn.csv",
                     'corrmat_filepath':"output/correlation_matrix_determinant.csv",
                     'pvalue_filepath':"output/p_values_determinant.csv",
-                    'variance_filepath':"output/variance_determinant_mn.csv", 
+                    'fa_filepath':"output/fa_determinant_mn.csv", 
                     'sigcorr_filepath':"output/significant_correlations_determinant.csv",
                     'decorrelated_filepath':'data/decorrelated_determinant_data_mn',
                     'VER':'mn',
@@ -432,7 +444,7 @@ OUTCOME_STD = {'cols_filepath':"data/health_outcomes.csv",
                 'domain_filepath':None,
                 'corrmat_filepath':"output/correlation_matrix_outcome.csv", 
                 'pvalue_filepath':"output/p_values_outcome.csv",
-                'variance_filepath':"output/variance_outcome_std.csv", 
+                'fa_filepath':"output/fa_outcome_std.csv", 
                 'sigcorr_filepath':'output/significant_correlations_outcome.csv',
                 'decorrelated_filepath':'data/decorrelated_outcome_data_std',
                 'VER':'std',
@@ -445,7 +457,7 @@ OUTCOME_MN = {'cols_filepath':"data/health_outcomes.csv",
                 'domain_filepath':None,
                 'corrmat_filepath':"output/correlation_matrix_outcome.csv", 
                 'pvalue_filepath':"output/p_values_outcome.csv",
-                'variance_filepath':"output/variance_outcome_mn.csv",
+                'fa_filepath':"output/fa_outcome_mn.csv",
                 'sigcorr_filepath':'output/significant_correlations_outcome.csv',
                 'decorrelated_filepath':'data/decorrelated_outcome_data_mn',
                 'VER':'mn',
@@ -458,7 +470,7 @@ ALL_STD = {'cols_filepath':"data/all_data.csv",
             'domain_filepath':None,
             'corrmat_filepath':"output/correlation_matrix_all.csv",
             'pvalue_filepath':"output/p_values_all.csv", 
-            'variance_filepath':"output/variance_all_std.csv",
+            'fa_filepath':"output/fa_all_std.csv",
             'sigcorr_filepath':"output/significant_correlations_all.csv",
             'decorrelated_filepath':"data/decorrelated_all_data_std",
             'VER':'std',
@@ -471,7 +483,7 @@ ALL_MN = {'cols_filepath':"data/all_data.csv",
             'domain_filepath':None,
             'corrmat_filepath':"output/correlation_matrix_all.csv",
             'pvalue_filepath':"output/p_values_all.csv",
-            'variance_filepath':"output/variance_all_mn.csv",
+            'fa_filepath':"output/fa_all_mn.csv",
             'sigcorr_filepath':"output/significant_correlations_all.csv", 
             'decorrelated_filepath':"data/decorrelated_all_data_mn",
             'VER':'mn',
@@ -484,7 +496,7 @@ DC_DETERMINANT_STD = {'cols_filepath':"data/decorrelated_determinant_data_std_co
                         'domain_filepath':"output/pca_decorrelated_domains_std.csv",
                         'corrmat_filepath':"output/correlation_matrix_decorrelated_determinant.csv",
                         'pvalue_filepath':"output/p_values_decorrelated_determinant.csv",
-                        'variance_filepath':None,
+                        'fa_filepath':None,
                         'sigcorr_filepath':"output/significant_correlations_decorrelated_determinant.csv",
                         'decorrelated_filepath':None,
                         'VER':'std',
@@ -559,7 +571,9 @@ def generate_results():
     health_obj = HealthScores(DETERMINANT_STD)
     health_obj.calc_pca(write=True)
     health_obj.calc_loadings() 
+    health_obj.factor_analysis(write=True)
     health_obj.score_per_domain()
+    health_obj.factor_analysis_perdomain(write=True)
     health_obj.write_corr_mat()
     health_obj.write_p_values()
     health_obj.write_corr_mat_per_dom()
@@ -572,12 +586,15 @@ def generate_results():
     health_obj = HealthScores(DETERMINANT_MN)
     health_obj.calc_pca(write=True)
     health_obj.calc_loadings()
+    health_obj.factor_analysis(write=True)
     health_obj.score_per_domain()
+    health_obj.factor_analysis_perdomain(write=True)
     health_obj.correlation_analysis()
     
     health_obj = HealthScores(OUTCOME_STD)
     health_obj.calc_pca(write=True)
     health_obj.calc_loadings()
+    health_obj.factor_analysis(write=True)
     health_obj.write_corr_mat()
     health_obj.write_p_values()
     health_obj.write_significant_correlations(health_obj.corrmat_file, health_obj.pvalue_file, health_obj.sigcorr_file)
@@ -586,11 +603,13 @@ def generate_results():
     health_obj = HealthScores(OUTCOME_MN)
     health_obj.calc_pca(write=True)
     health_obj.calc_loadings()
+    health_obj.factor_analysis(write=True)
     health_obj.correlation_analysis()
 
     health_obj = HealthScores(ALL_STD)
     health_obj.calc_pca(write=True)
     health_obj.calc_loadings()
+    health_obj.factor_analysis(write=True)
     health_obj.write_corr_mat()
     health_obj.write_p_values()
     health_obj.write_significant_correlations(health_obj.corrmat_file, health_obj.pvalue_file, health_obj.sigcorr_file)
@@ -599,6 +618,7 @@ def generate_results():
     health_obj = HealthScores(ALL_MN)
     health_obj.calc_pca(write=True)
     health_obj.calc_loadings()
+    health_obj.factor_analysis(write=True)
     health_obj.correlation_analysis()
 
 def generate_decorrelated_results():
@@ -606,6 +626,7 @@ def generate_decorrelated_results():
     health_obj.calc_pca(write=True)
     health_obj.calc_loadings()
     health_obj.score_per_domain()
+    health_obj.factor_analysis_perdomain(write=True)
     health_obj.write_corr_mat()
     health_obj.write_p_values()
     health_obj.write_corr_mat_per_dom()

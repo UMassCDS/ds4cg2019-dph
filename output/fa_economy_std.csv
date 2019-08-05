@@ -1,0 +1,10 @@
+Feature,Importance
+comm_wfh_%,1.0570231289241627
+no_vehicle_avail_%,0.8418691767945619
+income_capita_USD,0.8272122970823387
+english_verywell_%,0.7765289694887656
+house_income_gt30_USD_%,0.7242010455008513
+house_2000to2014_%,0.6578009291061074
+households_recfoodstamps_%,0.3360802820737358
+exp_perpupil_USD,0.10667287620909
+median_household_income_USD,0.09189534589372947

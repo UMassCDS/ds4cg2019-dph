@@ -195,16 +195,15 @@ class HealthScores():
     def load_domains(self):
         columns = self.extract_features()
         domains_by_no = {}
-        domains = self.domains
-
-        for d in domains:
-            for indi in domains[d]:
-                try:
-                    domains_by_no[d].append(str(columns.index(indi)))
-                except KeyError:
-                    domains_by_no[d] = [str(columns.index(indi))]
-
         determinant_data = pd.read_csv(self.data, index_col=0)
+        true_num = list(determinant_data)
+
+        for d in self.domains:
+            for indi in self.domains[d]:
+                try:
+                    domains_by_no[d].append(str(true_num[columns.index(indi)]))
+                except KeyError:
+                    domains_by_no[d] = [str(true_num[columns.index(indi)])]
 
         domain_data = {}
         for dom in domains_by_no:
@@ -515,12 +514,15 @@ def generate_decorrelated_results():
     health_obj.score_per_domain()
     health_obj.write_corr_mat()
     health_obj.write_p_values()
+    health_obj.write_corr_mat_per_dom()
+    health_obj.write_p_values_per_dom()
     health_obj.write_significant_correlations(health_obj.corrmat_file, health_obj.pvalue_file, health_obj.sigcorr_file)
-
-
+    for d in health_obj.domains:
+        health_obj.write_significant_correlations('output/correlation_matrix_decorrelated_'+ d + '.csv', 'output/p_values_decorrelated_'+d+'.csv', 'output/significant_correlations_decorrelated_'+d+'.csv')
+    
 def main():
-    generate_results()
-    #generate_decorrelated_results()
+    #generate_results()
+    generate_decorrelated_results()
     
 if __name__ == '__main__':
     main()

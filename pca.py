@@ -23,7 +23,7 @@ class HealthScores():
         self.domain_file = INFO['domain_filepath']
         self.corrmat_file = INFO['corrmat_filepath']
         self.pvalue_file = INFO['pvalue_filepath']
-        self.var_file = INFO['variance_filepath']
+        self.fa_file = INFO['fa_filepath']
         self.sigcorr_file = INFO['sigcorr_filepath']
         self.decorrelated_file = INFO['decorrelated_filepath']
         self.VER = INFO['VER']
@@ -70,15 +70,12 @@ class HealthScores():
     def extract_towns(self):
         """
         Extract the town names, so that health score can have meaning
-        TODO: FIX FOR ALL PCA
         """
-        # data = pd.read_csv(self.read_cols, index_col=0)
-        # TODO: clean
         data = pd.read_csv('data/health_determinants.csv', index_col=0)
         towns = list(data.index)
         return towns
 
-    def calc_pca(self, write=True, dom_data=(None, None), explain_var_dfilepath=None):
+    def calc_pca(self, write=True, dom_data=(None, None), explain_fa_dfilepath=None):
         """
         Method to calculate factor scores
         """
@@ -115,11 +112,11 @@ class HealthScores():
 
         self.n = len(selected_components)
 
-        #Print explained variance
-        #if explain_var_dfilepath != None:
-        #    self.explain_var(pca, per_dom_filepath=explain_var_dfilepath, domain=dom_data[0])
-        #else:
-        #    self.explain_var(pca)
+        #Calculate the factors that contribute to a variable
+        if dom_data[0] != None:
+           self.explain_fa(per_dom_filepath=explain_fa_dfilepath, domain_data=dom_data[1])
+        else:
+           self.explain_fa()
 
         #weights assigned to each pc
         weights = np.exp((np.log(self.pca.explained_variance_) - np.log(logsumexp(self.pca.explained_variance_[:self.n]))))
@@ -151,6 +148,24 @@ class HealthScores():
                 writer.writerows(health_scores)
         
         return scores 
+
+    def explain_fa(self, per_dom_filepath = None, domain_data = None):
+        if per_dom_filepath==None:
+            inp = pd.read_csv(self.data, index_col=0)
+        else:
+            inp = pd.read_csv(domain_data, index_col=0)
+        fa = FactorAnalyzer(n_factors = self.n, rotation='varimax')
+        
+        fa.fit(inp)
+        magnitude = fa.get_communalities()
+
+        feat = self.extract_features()
+        mag_dict = {}
+        for t,f in enumerate(feat):
+            mag_dict[f] = magnitude[t]
+        
+        sorted_mag = sorted(mag_dict.items(), key=lambda kv:kv[1], reverse=True)
+        return sorted_mag
 
     def load_data(self):
         data = pd.read_csv(self.data, index_col=0)
@@ -217,7 +232,7 @@ class HealthScores():
         domain_scores = []
         for dom in domains_by_no:
             domain_data = determinant_data[domains_by_no[dom]]
-            domain_scores.append(self.calc_pca(write=False, dom_data=(dom, domain_data), explain_var_dfilepath='output/variance_'+str(dom) + '_' + self.VER + '.csv'))
+            domain_scores.append(self.calc_pca(write=False, dom_data=(dom, domain_data), explain_fa_dfilepath='output/variance_'+str(dom) + '_' + self.VER + '.csv'))
         
         domain_scores = np.array(domain_scores).T
         avg_dom = np.array([[round(x,2) for x in np.average(domain_scores, axis =1)]]).T
@@ -314,37 +329,9 @@ class HealthScores():
         df = pd.DataFrame(data = cm, columns = headers)
         df.set_index("\\", inplace = True)
         df.to_csv(write_file)
-
-    def explain_var(self, pca, per_dom_filepath=None, domain = None):
-        var = pca.explained_variance_ratio_
-        if per_dom_filepath==None:
-            features = self.extract_features()
-            variances = list(zip(features, var))
-            with open(self.var_file, "w", newline="") as f:
-                writer = csv.writer(f)
-                writer.writerow(['Feature', 'Eigen value (%)'])
-                writer.writerows(variances)
-        else:
-            features = self.domains[domain]
-            variances = list(zip(features, var))
-            with open(per_dom_filepath, "w", newline="") as f:
-                writer = csv.writer(f)
-                writer.writerow(['Feature', 'Eigen value (%)'])
-                writer.writerows(variances)
     
     def correlation_analysis(self):
-        fa = FactorAnalyzer(n_factors = self.n, rotation='varimax')
-        inp = pd.read_csv(self.data, index_col=0)
-        fa.fit(inp)
-        magnitude = fa.get_communalities()
-
-        feat = self.extract_features()
-        mag_dict = {}
-        for t,f in enumerate(feat):
-            mag_dict[f] = magnitude[t]
-        
-        sorted_mag = sorted(mag_dict.items(), key=lambda kv:kv[1], reverse=True)
-        
+        sorted_mag = self.explain_fa()
         sig_corr = pd.read_csv(self.sigcorr_file, index_col=0)
 
         columns_to_drop = []
@@ -356,6 +343,7 @@ class HealthScores():
                 for loc in location:
                     if loc not in columns_to_drop:
                         columns_to_drop.append(str(loc))
+
         decorrelated = inp.drop(columns=columns_to_drop)
         column_num = list(map(int, list(decorrelated)))
         column_name = list(np.array(self.extract_features())[column_num])
@@ -372,7 +360,7 @@ DETERMINANT_STD = {'cols_filepath':"data/health_determinants.csv",
                     'domain_filepath':"output/pca_domains_std.csv",
                     'corrmat_filepath':"output/correlation_matrix_determinant.csv", 
                     'pvalue_filepath':"output/p_values_determinant.csv", 
-                    'variance_filepath':"output/variance_determinant_std.csv",
+                    'fa_filepath':"output/fa_determinant_std.csv",
                     'sigcorr_filepath':"output/significant_correlations_determinant.csv",
                     'decorrelated_filepath':"data/decorrelated_determinant_data_std",
                     'VER':'std'}
@@ -384,7 +372,7 @@ DETERMINANT_MN = {'cols_filepath':"data/health_determinants.csv",
                     'domain_filepath':"output/pca_domains_mn.csv",
                     'corrmat_filepath':"output/correlation_matrix_determinant.csv",
                     'pvalue_filepath':"output/p_values_determinant.csv",
-                    'variance_filepath':"output/variance_determinant_mn.csv", 
+                    'fa_filepath':"output/fa_determinant_mn.csv", 
                     'sigcorr_filepath':"output/significant_correlations_determinant.csv",
                     'decorrelated_filepath':'data/decorrelated_determinant_data_mn',
                     'VER':'mn'}
@@ -396,7 +384,7 @@ OUTCOME_STD = {'cols_filepath':"data/health_outcomes.csv",
                 'domain_filepath':None,
                 'corrmat_filepath':"output/correlation_matrix_outcome.csv", 
                 'pvalue_filepath':"output/p_values_outcome.csv",
-                'variance_filepath':"output/variance_outcome_std.csv", 
+                'fa_filepath':"output/fa_outcome_std.csv", 
                 'sigcorr_filepath':'output/significant_correlations_outcome.csv',
                 'decorrelated_filepath':'data/decorrelated_outcome_data_std',
                 'VER':'std'}
@@ -408,7 +396,7 @@ OUTCOME_MN = {'cols_filepath':"data/health_outcomes.csv",
                 'domain_filepath':None,
                 'corrmat_filepath':"output/correlation_matrix_outcome.csv", 
                 'pvalue_filepath':"output/p_values_outcome.csv",
-                'variance_filepath':"output/variance_outcome_mn.csv",
+                'fa_filepath':"output/fa_outcome_mn.csv",
                 'sigcorr_filepath':'output/significant_correlations_outcome.csv',
                 'decorrelated_filepath':'data/decorrelated_outcome_data_mn',
                 'VER':'mn'}
@@ -420,7 +408,7 @@ ALL_STD = {'cols_filepath':"data/all_data.csv",
             'domain_filepath':None,
             'corrmat_filepath':"output/correlation_matrix_all.csv",
             'pvalue_filepath':"output/p_values_all.csv", 
-            'variance_filepath':"output/variance_all_std.csv",
+            'fa_filepath':"output/fa_all_std.csv",
             'sigcorr_filepath':"output/significant_correlations_all.csv",
             'decorrelated_filepath':"data/decorrelated_all_data_std",
             'VER':'std'}
@@ -432,7 +420,7 @@ ALL_MN = {'cols_filepath':"data/all_data.csv",
             'domain_filepath':None,
             'corrmat_filepath':"output/correlation_matrix_all.csv",
             'pvalue_filepath':"output/p_values_all.csv",
-            'variance_filepath':"output/variance_all_mn.csv",
+            'fa_filepath':"output/fa_all_mn.csv",
             'sigcorr_filepath':"output/significant_correlations_all.csv", 
             'decorrelated_filepath':"data/decorrelated_all_data_mn",
             'VER':'mn'}

@@ -55,6 +55,7 @@ class HealthScores():
         self.sigcorr_file = INFO['sigcorr_filepath']
         self.decorrelated_file = INFO['decorrelated_filepath']
         self.VER = INFO['VER']
+        self.DC = INFO['DC']
         self.domains = {}
 
         if INFO['domain_filepath']:
@@ -115,7 +116,7 @@ class HealthScores():
         #perform PCA on the covariance matrix
         self.pca = PCA()
         self.pca.fit(cov_mat)
-
+        
         # kaiser criterion : Components with eigen_values > 1.0 should be retained
         selected_components = np.argwhere(self.pca.explained_variance_>cut_off).flatten()
         selected_vr = self.pca.explained_variance_ratio_[selected_components]
@@ -126,6 +127,8 @@ class HealthScores():
         selected_components = selected_components[mod_idxs].flatten()
 
         self.n = len(selected_components)
+        if self.n < 1:
+            self.n = 1
 
         #Print explained variance
         #if explain_var_dfilepath != None:
@@ -231,6 +234,7 @@ class HealthScores():
                 domain_scores.append(self.calc_pca(write=False, dom_data=(dom, domain_data), explain_var_dfilepath='output/variance_'+str(dom) + '_' + self.VER + '.csv'))
             else:
                 domain_scores.append([round(x,2) for x in MinMaxScaler().fit_transform(np.array(domain_data)).flatten()])
+        
         domain_scores = np.array(domain_scores).T
         avg_dom = np.array([[round(x,2) for x in np.average(domain_scores, axis =1)]]).T
         domain_scores = np.concatenate((domain_scores, avg_dom), axis = 1)
@@ -257,18 +261,29 @@ class HealthScores():
     
     def write_corr_mat_per_dom(self):
         data = self.load_domains()
+        true_num = list(pd.read_csv(self.data, index_col=0))
         for d in self.domains:
             curr = data[d]
             col = list(curr)
-            column_num = list(map(int, col))
-            column_name = list(np.array(self.extract_features())[column_num])
+            ind = []
+            for c in col:
+                ind.append(true_num.index(c))
+            index_num = list(map(int, ind))
+            column_name = list(np.array(self.extract_features())[index_num])
             index = np.array([column_name]).T
             matrix = self.calc_corr_mat(curr)
-            matrix = np.concatenate((index, matrix), axis =1)
+            try:
+                matrix = np.concatenate((index, matrix), axis =1)
+            except ValueError:
+                matrix = np.array([np.array([self.calc_corr_mat(curr)])])
+                matrix = np.concatenate((index, matrix), axis =1)
             headers = ["\\"] + column_name
             df = pd.DataFrame(data = matrix, columns = headers)
             df.set_index("\\", inplace=True)
-            df.to_csv('output/correlation_matrix_' + d + '.csv')
+            if self.DC:
+                df.to_csv('output/correlation_matrix_decorrelated_' + d + '.csv')
+            else:
+                df.to_csv('output/correlation_matrix_' + d + '.csv')
     
     def p_values(self, data):
         _,N = data.shape
@@ -294,11 +309,15 @@ class HealthScores():
     
     def write_p_values_per_dom(self):
         data = self.load_domains()
+        true_num = list(pd.read_csv(self.data, index_col=0))
         for d in self.domains:
             curr = data[d]
             col = list(curr)
-            column_num = list(map(int, col))
-            column_name = list(np.array(self.extract_features())[column_num])
+            ind = []
+            for c in col:
+                ind.append(true_num.index(c))
+            index_num = list(map(int, ind))
+            column_name = list(np.array(self.extract_features())[index_num])
             index = np.array([column_name]).T
 
             pvals = self.p_values(np.array(curr))
@@ -307,7 +326,10 @@ class HealthScores():
 
             df = pd.DataFrame(data = pvals, columns = headers)
             df.set_index("\\", inplace = True)
-            df.to_csv('output/p_values_'+d+'.csv')
+            if self.DC:
+                df.to_csv('output/p_values_decorrelated_'+d+'.csv')
+            else:
+                df.to_csv('output/p_values_'+d+'.csv')
     
     def write_significant_correlations(self, cm_file, pval_file, write_file):
         cm = pd.read_csv(cm_file, index_col = 0)
@@ -387,7 +409,8 @@ DETERMINANT_STD = {'cols_filepath':"data/health_determinants.csv",
                     'variance_filepath':"output/variance_determinant_std.csv",
                     'sigcorr_filepath':"output/significant_correlations_determinant.csv",
                     'decorrelated_filepath':"data/decorrelated_determinant_data_std",
-                    'VER':'std'}
+                    'VER':'std',
+                    'DC':False}
 
 DETERMINANT_MN = {'cols_filepath':"data/health_determinants.csv",
                     'data_filepath':"data/determinant_data_mn.csv",
@@ -399,7 +422,8 @@ DETERMINANT_MN = {'cols_filepath':"data/health_determinants.csv",
                     'variance_filepath':"output/variance_determinant_mn.csv", 
                     'sigcorr_filepath':"output/significant_correlations_determinant.csv",
                     'decorrelated_filepath':'data/decorrelated_determinant_data_mn',
-                    'VER':'mn'}
+                    'VER':'mn',
+                    'DC':False}
 
 OUTCOME_STD = {'cols_filepath':"data/health_outcomes.csv",
                 'data_filepath':"data/outcome_data_std.csv",
@@ -411,7 +435,8 @@ OUTCOME_STD = {'cols_filepath':"data/health_outcomes.csv",
                 'variance_filepath':"output/variance_outcome_std.csv", 
                 'sigcorr_filepath':'output/significant_correlations_outcome.csv',
                 'decorrelated_filepath':'data/decorrelated_outcome_data_std',
-                'VER':'std'}
+                'VER':'std',
+                'DC':False}
 
 OUTCOME_MN = {'cols_filepath':"data/health_outcomes.csv", 
                 'data_filepath':"data/outcome_data_mn.csv",
@@ -423,7 +448,8 @@ OUTCOME_MN = {'cols_filepath':"data/health_outcomes.csv",
                 'variance_filepath':"output/variance_outcome_mn.csv",
                 'sigcorr_filepath':'output/significant_correlations_outcome.csv',
                 'decorrelated_filepath':'data/decorrelated_outcome_data_mn',
-                'VER':'mn'}
+                'VER':'mn',
+                'DC':False}
 
 ALL_STD = {'cols_filepath':"data/all_data.csv",
             'data_filepath':"data/all_data_std.csv",
@@ -435,7 +461,8 @@ ALL_STD = {'cols_filepath':"data/all_data.csv",
             'variance_filepath':"output/variance_all_std.csv",
             'sigcorr_filepath':"output/significant_correlations_all.csv",
             'decorrelated_filepath':"data/decorrelated_all_data_std",
-            'VER':'std'}
+            'VER':'std',
+            'DC':False}
 
 ALL_MN = {'cols_filepath':"data/all_data.csv",
             'data_filepath':"data/all_data_mn.csv",
@@ -447,7 +474,8 @@ ALL_MN = {'cols_filepath':"data/all_data.csv",
             'variance_filepath':"output/variance_all_mn.csv",
             'sigcorr_filepath':"output/significant_correlations_all.csv", 
             'decorrelated_filepath':"data/decorrelated_all_data_mn",
-            'VER':'mn'}
+            'VER':'mn',
+            'DC':False}
 
 DC_DETERMINANT_STD = {'cols_filepath':"data/decorrelated_determinant_data_std_columns.csv",
                         'data_filepath':"data/decorrelated_determinant_data_std.csv",
@@ -459,7 +487,73 @@ DC_DETERMINANT_STD = {'cols_filepath':"data/decorrelated_determinant_data_std_co
                         'variance_filepath':None,
                         'sigcorr_filepath':"output/significant_correlations_decorrelated_determinant.csv",
                         'decorrelated_filepath':None,
-                        'VER':'std'}
+                        'VER':'std',
+                        'DC':True}
+
+DC_DETERMINANT_MN = {'cols_filepath':"data/decorrelated_determinant_data_mn_columns.csv",
+                    'data_filepath':"data/decorrelated_determinant_data_mn.csv",
+                    'pca_filepath':"output/pca_decorreleated_determinant_mn.csv", 
+                    'loadings_filepath':"output/loadings_decorrelated_determinant_mn.csv", 
+                    'domain_filepath':"output/pca_decorrelated_domains_mn.csv",
+                    'corrmat_filepath':"output/correlation_matrix_decorrelaed_determinant.csv",
+                    'pvalue_filepath':"output/p_values_decorrelated_determinant.csv",
+                    'variance_filepath':None, 
+                    'sigcorr_filepath':"output/significant_correlations_decorrelated_determinant.csv",
+                    'decorrelated_filepath':None,
+                    'VER':'mn',
+                    'DC':True}
+
+DC_OUTCOME_STD = {'cols_filepath':"data/decorrelated_outcome_data_std_columns.csv",
+                'data_filepath':"data/decorrelated_outcome_data_std.csv",
+                'pca_filepath':"output/pca_decorrelated_outcome_std.csv", 
+                'loadings_filepath':"output/loadings_decorrelated_outcome_std.csv",
+                'domain_filepath':None,
+                'corrmat_filepath':"output/correlation_matrix_decorrelated_outcome.csv", 
+                'pvalue_filepath':"output/p_values_decorrelated_outcome.csv",
+                'variance_filepath':None, 
+                'sigcorr_filepath':'output/significant_correlations_decorrelated_outcome.csv',
+                'decorrelated_filepath':None,
+                'VER':'std',
+                'DC':True}
+
+DC_OUTCOME_MN = {'cols_filepath':"data/decorrelated_outcome_data_mn_columns.csv", 
+                'data_filepath':"data/decorrelated_outcome_data_mn.csv",
+                'pca_filepath':"output/pca_decorrelated_outcome_mn.csv",
+                'loadings_filepath':"output/loadings_decorrelated_outcome_mn.csv",
+                'domain_filepath':None,
+                'corrmat_filepath':"output/correlation_matrix_decorrelated_outcome.csv", 
+                'pvalue_filepath':"output/p_values_decorrelated_outcome.csv",
+                'variance_filepath':None,
+                'sigcorr_filepath':'output/significant_correlations_decorrelated_outcome.csv',
+                'decorrelated_filepath':None,
+                'VER':'mn',
+                'DC':True}
+
+DC_ALL_STD = {'cols_filepath':"data/decorrelated_all_data_std_columns.csv",
+            'data_filepath':"data/decorrelated_all_data_std.csv",
+            'pca_filepath':"output/pca_decorrelated_all_std.csv",
+            'loadings_filepath':"output/loadings_decorrelated_all_std.csv",
+            'domain_filepath':None,
+            'corrmat_filepath':"output/correlation_matrix_decorrelated_all.csv",
+            'pvalue_filepath':"output/p_values_decorrelated_all.csv", 
+            'variance_filepath':None,
+            'sigcorr_filepath':"output/significant_correlations_decorrelated_all.csv",
+            'decorrelated_filepath':None,
+            'VER':'std',
+            'DC':True}
+
+DC_ALL_MN = {'cols_filepath':"data/decorrelated_all_data_mn_columns.csv",
+            'data_filepath':"data/decorrelated_all_data_mn.csv",
+            'pca_filepath':"output/pca_decorrelated_all_mn.csv",
+            'loadings_filepath':"output/loadings_decorrealted_all_mn.csv",
+            'domain_filepath':None,
+            'corrmat_filepath':"output/correlation_matrix_decorrelated_all.csv",
+            'pvalue_filepath':"output/p_values_decorrealted_all.csv",
+            'variance_filepath':None,
+            'sigcorr_filepath':"output/significant_correlations_decorrelated_all.csv", 
+            'decorrelated_filepath': None,
+            'VER':'mn',
+            'DC':True}
 
 def generate_results():
     health_obj = HealthScores(DETERMINANT_STD)
@@ -520,8 +614,35 @@ def generate_decorrelated_results():
     for d in health_obj.domains:
         health_obj.write_significant_correlations('output/correlation_matrix_decorrelated_'+ d + '.csv', 'output/p_values_decorrelated_'+d+'.csv', 'output/significant_correlations_decorrelated_'+d+'.csv')
     
+    health_obj = HealthScores(DC_DETERMINANT_MN)
+    health_obj.calc_pca(write=True)
+    health_obj.calc_loadings()
+    health_obj.score_per_domain()
+    
+    health_obj = HealthScores(DC_OUTCOME_STD)
+    health_obj.calc_pca(write=True)
+    health_obj.calc_loadings()
+    health_obj.write_corr_mat()
+    health_obj.write_p_values()
+    health_obj.write_significant_correlations(health_obj.corrmat_file, health_obj.pvalue_file, health_obj.sigcorr_file)
+
+    health_obj = HealthScores(DC_OUTCOME_MN)
+    health_obj.calc_pca(write=True)
+    health_obj.calc_loadings()
+
+    health_obj = HealthScores(DC_ALL_STD)
+    health_obj.calc_pca(write=True)
+    health_obj.calc_loadings()
+    health_obj.write_corr_mat()
+    health_obj.write_p_values()
+    health_obj.write_significant_correlations(health_obj.corrmat_file, health_obj.pvalue_file, health_obj.sigcorr_file)
+
+    health_obj = HealthScores(DC_ALL_MN)
+    health_obj.calc_pca(write=True)
+    health_obj.calc_loadings()
+
 def main():
-    #generate_results()
+    generate_results()
     generate_decorrelated_results()
     
 if __name__ == '__main__':

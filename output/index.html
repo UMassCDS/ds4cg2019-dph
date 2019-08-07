@@ -35,8 +35,8 @@
             var xAxis = d3.axisBottom()
                         .scale(x);
                 
-            var colorScale = d3.scaleSequential(d3["interpolatePuBuGn"])
-                                .domain([w,0])
+            var colorScale = d3.scaleSequential(d3["interpolateViridis"])
+                                .domain([0,w])
                 
             var bars = d3.select("#scale").append("svg")
                         .attr("height", h + 2*m)
@@ -58,7 +58,7 @@
                         .attr("width", 1)
                         .style("fill", function(d, i){return colorScale(d);});
             
-            d3.csv("pca_decorrelated_domains_mn.csv", function(error, data){
+            d3.csv("pca_domains_mn.csv", function(error, data){
                 if (error) throw error;
                 var width = 1000,
                     height = 700;
@@ -79,8 +79,8 @@
                 d3.json("ma.topo.json", function(error, ma){
                     var topo = topojson.feature(ma, ma.objects.ma).features;
                     var town = map.selectAll(".land").data(topo)
-                    var colorScale = d3.scaleSequential(d3["interpolatePuBuGn"])
-                                        .domain([1,0]);
+                    var colorScale = d3.scaleSequential(d3["interpolateViridis"])
+                                        .domain([0,1]);
                     town.enter().insert("path")
                         .attr("class", "land")
                         .attr("d", path)
@@ -93,7 +93,7 @@
                                 if(name == "manchester"){
                                     for(var j = 0; j < data.length; j++){
                                         if(data[j]["index"].toLowerCase() == "manchester-by-the-sea"){
-                                            return colorScale(data[j]["ECON"])
+                                            return colorScale(data[j]["EMP"])
                                         }
                                     }
 
@@ -102,7 +102,7 @@
                                 else{
                                     for(var j = 0; j < data.length; j++){
                                         if(name== data[j]["index"].toLowerCase()){
-                                            return colorScale(data[j]["ECON"])
+                                            return colorScale(data[j]["EMP"])
                                         }
                                     }
                                 }

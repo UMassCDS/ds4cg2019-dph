@@ -399,16 +399,20 @@ class HealthScores():
         inp, sorted_mag = self.factor_analysis()
         sig_corr = pd.read_csv(self.sigcorr_file, index_col=0)
 
+        num_cov = {}
+        for t,f in enumerate(self.extract_features()):
+            num_cov[f] = str(t)
+
         columns_to_drop = []
 
         for item in sorted_mag:
-            if item[0] not in columns_to_drop:
+            if num_cov[item[0]] not in columns_to_drop:
                 col = np.array(sig_corr[item[0]])
                 location = list(np.where(col != 0))[0]
                 for loc in location:
-                    if loc not in columns_to_drop:
+                    if str(loc) not in columns_to_drop:
                         columns_to_drop.append(str(loc))
-
+        
         decorrelated = inp.drop(columns=columns_to_drop)
         column_num = list(map(int, list(decorrelated)))
         column_name = list(np.array(self.extract_features())[column_num])

@@ -1,4 +1,7 @@
 Feature,Importance
-gini_index,0.1709669776564477
-debt_pervaluation_%,0.12362112056162455
-median_earnings_retail_USD,0.11867953663006903
+below_poverty_level_%,0.811342894377059
+snap_%,0.7147259698808888
+median_household_income_USD,0.4824345929109176
+median_earnings_retail_USD,0.08498816305415566
+debt_pervaluation_%,0.0635007692509516
+gini_index,0.04024777148261511

@@ -18,13 +18,13 @@ Auburn,0.05
 Charlemont,0.05
 Chester,0.05
 Colrain,0.05
+Fitchburg,0.05
 North Adams,0.05
 Pittsfield,0.05
 Rowe,0.05
 Royalston,0.05
 Russell,0.05
 Becket,0.06
-Fitchburg,0.06
 Greenfield,0.06
 Holyoke,0.06
 Northfield,0.06
@@ -108,6 +108,7 @@ Otis,0.1
 Petersham,0.1
 Salisbury,0.1
 Sandisfield,0.1
+Shirley,0.1
 South Hadley,0.1
 Swansea,0.1
 Ashburnham,0.11
@@ -121,7 +122,6 @@ Lynn,0.11
 Maynard,0.11
 Northampton,0.11
 Northbridge,0.11
-Shirley,0.11
 Sturbridge,0.11
 Taunton,0.11
 Williamsburg,0.11
@@ -147,7 +147,6 @@ Ayer,0.13
 Barnstable,0.13
 Bourne,0.13
 Chelsea,0.13
-Douglas,0.13
 East Bridgewater,0.13
 Easton,0.13
 Egremont,0.13
@@ -171,6 +170,7 @@ Amesbury,0.14
 Ashby,0.14
 Barre,0.14
 Blandford,0.14
+Douglas,0.14
 Kingston,0.14
 Montgomery,0.14
 Plymouth,0.14
@@ -192,15 +192,12 @@ Rockland,0.15
 Rutland,0.15
 Shrewsbury,0.15
 Whitman,0.15
-Bellingham,0.16
 Brewster,0.16
 Bridgewater,0.16
 Eastham,0.16
-Falmouth,0.16
 Leverett,0.16
 Malden,0.16
 Middleborough,0.16
-Monterey,0.16
 Pepperell,0.16
 Plympton,0.16
 Princeton,0.16
@@ -208,12 +205,15 @@ Randolph,0.16
 Salem,0.16
 Sandwich,0.16
 Williamstown,0.16
+Bellingham,0.17
 Braintree,0.17
 Deerfield,0.17
 Dighton,0.17
+Falmouth,0.17
 Foxborough,0.17
 Groton,0.17
 Lenox,0.17
+Monterey,0.17
 New Braintree,0.17
 Norwood,0.17
 Oak Bluffs,0.17
@@ -249,7 +249,6 @@ Marshfield,0.2
 Mendon,0.2
 Somerville,0.2
 Southampton,0.2
-Stoneham,0.2
 Westborough,0.2
 Amherst,0.21
 Berlin,0.21
@@ -259,6 +258,7 @@ Marlborough,0.21
 Medway,0.21
 North Attleborough,0.21
 Northborough,0.21
+Stoneham,0.21
 Upton,0.21
 Walpole,0.21
 Watertown,0.21
@@ -283,18 +283,18 @@ Goshen,0.24
 Milton,0.24
 Reading,0.24
 Peabody,0.25
-Southborough,0.25
 Sterling,0.25
 Tisbury,0.25
 North Andover,0.26
+Southborough,0.26
 Westford,0.26
 Arlington,0.27
-Hingham,0.27
-Acton,0.28
 Essex,0.28
+Hingham,0.28
 Mattapoisett,0.28
 Rowley,0.28
 Stow,0.28
+Acton,0.29
 Orleans,0.29
 Scituate,0.29
 Sharon,0.29
@@ -305,20 +305,20 @@ Millis,0.3
 Needham,0.3
 Provincetown,0.3
 Chatham,0.31
-Gosnold,0.31
-Andover,0.32
-Bolton,0.32
 Duxbury,0.32
 Edgartown,0.32
+Gosnold,0.32
 Hopkinton,0.32
 Norwell,0.32
 Wayland,0.32
+Andover,0.33
 Ashland,0.33
 Bedford,0.33
+Bolton,0.33
 Lexington,0.33
-Burlington,0.34
-Harvard,0.35
+Burlington,0.35
 Belmont,0.36
+Harvard,0.36
 Carlisle,0.38
 Boxborough,0.39
 Concord,0.39
@@ -326,23 +326,23 @@ Marblehead,0.39
 Truro,0.4
 Tyringham,0.4
 Wenham,0.41
-Medfield,0.42
-Sherborn,0.42
 Boxford,0.43
 Cohasset,0.43
-Sudbury,0.43
+Medfield,0.43
+Sherborn,0.43
 Hamilton,0.44
 Manchester-by-the-Sea,0.44
 Newton,0.44
+Sudbury,0.44
 Lincoln,0.45
 Nahant,0.46
-Westwood,0.47
-Lynnfield,0.49
+Westwood,0.48
+Lynnfield,0.5
 West Tisbury,0.52
-Brookline,0.53
+Brookline,0.54
 Cambridge,0.6
 Nantucket,0.64
-West Newbury,0.64
+West Newbury,0.65
 Winchester,0.66
 Dover,0.69
 Rockport,0.7

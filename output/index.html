@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <style>
+            html, body {
+                height: 100%;
+            }
+            #map {
+                display: flex;
+                align-items: center;
+            }
+            #map_ma, #scale{
+                display:block;
+                margin:auto;
+            }
+
+        </style>
+        
+    </head>
+    <body>
+        <div id = "container">
+            <div id = "map"></div>
+            <div style = "text-align: center" id = "scale"></div>
+        </div>
+        <script src="https://d3js.org/d3.v4.min.js"></script>
+        <script src="https://d3js.org/topojson.v2.min.js"></script>
+        <script src="//d3js.org/d3-scale-chromatic.v0.3.min.js"></script>
+        <script type = "text/javascript">
+            var w = 500,
+                h = 50,
+                m = 30;
+            
+            var x = d3.scaleLinear().range([0, w])
+                
+            var xAxis = d3.axisBottom()
+                        .scale(x);
+                
+            var colorScale = d3.scaleSequential(d3["interpolatePuBuGn"])
+                                .domain([w,0])
+                
+            var bars = d3.select("#scale").append("svg")
+                        .attr("height", h + 2*m)
+                        .attr("width", w)
+                        .selectAll(".bar")
+                        .data(d3.range(w), function(d){return d;})
+                        .enter()
+                        
+            bars.append("g")
+                        .style("font", "24px times")
+                        .attr("transform", "translate(0," + (h + m) +")")
+                        .call(d3.axisBottom(x));
+                
+            bars.append("rect")
+                        .attr("class", "bars")
+                        .attr("x", function(d,i){return i;})
+                        .attr("y", 0)
+                        .attr("height", h)
+                        .attr("width", 1)
+                        .style("fill", function(d, i){return colorScale(d);});
+            
+            d3.csv("pca_decorrelated_domains_mn.csv", function(error, data){
+                if (error) throw error;
+                var width = 1000,
+                    height = 700;
+                
+                var projection = d3.geoAlbersUsa()
+                                    .scale(19500)
+                                    .translate([-5700, 2400]);
+
+                var path = d3.geoPath()
+                    .projection(projection);
+                
+                var map = d3.select("#map").append("svg")
+                            .attr("width", width)
+                            .attr("height", height)
+                            .attr("id", "map_ma")
+                            .append("g");
+                
+                d3.json("ma.topo.json", function(error, ma){
+                    var topo = topojson.feature(ma, ma.objects.ma).features;
+                    var town = map.selectAll(".land").data(topo)
+                    var colorScale = d3.scaleSequential(d3["interpolatePuBuGn"])
+                                        .domain([1,0]);
+                    town.enter().insert("path")
+                        .attr("class", "land")
+                        .attr("d", path)
+                        .attr("id", function(d,i) { return d.id; })
+                        .style("stroke", "black")
+                        .style("stroke-width", 1.5)
+                        .style("fill", function(d,i){
+                                let name = d.properties.TOWN.toLowerCase();
+
+                                if(name == "manchester"){
+                                    for(var j = 0; j < data.length; j++){
+                                        if(data[j]["index"].toLowerCase() == "manchester-by-the-sea"){
+                                            return colorScale(data[j]["ECON"])
+                                        }
+                                    }
+
+                                }
+
+                                else{
+                                    for(var j = 0; j < data.length; j++){
+                                        if(name== data[j]["index"].toLowerCase()){
+                                            return colorScale(data[j]["ECON"])
+                                        }
+                                    }
+                                }
+
+                                return "rgb(0, 0, 0)"
+                        });
+                });
+            });
+        </script>
+    </body> 
+</html>

@@ -10,78 +10,78 @@ import os
 import pandas as pd
 import matplotlib.pyplot as plt
 plt.style.use('ggplot')
-plt.rcParams['figure.figsize'] = (12, 7)
+plt.rcParams['figure.figsize'] = (11, 7)
 
 def visualize_scores(locations=['Boston', 'Amherst', 'Springfield']):
     
     """ Creates bar plots for every town in ``locations`` """
     
     # read data
-    ALL_MN = pd.read_csv(os.getcwd()+'/output/pca_all_mn.csv', names=['Town', 'ALL_MN'], skiprows=1)
-    ALL_MN['rank_ALL_MN'] = ALL_MN.index+1
-    ALL_MN.set_index('Town', inplace=True)
+    ALL_MC = pd.read_csv(os.getcwd()+'/output/pca_all_mc.csv', names=['Town', 'ALL_MC'], skiprows=1)
+    ALL_MC['rank_ALL_MC'] = ALL_MC.index+1
+    ALL_MC.set_index('Town', inplace=True)
     
     ALL_STD = pd.read_csv(os.getcwd()+'/output/pca_all_std.csv', names=['Town', 'ALL_STD'], skiprows=1)
     ALL_STD['rank_ALL_STD'] = ALL_STD.index+1
     ALL_STD.set_index('Town', inplace=True)
     
-    DET_MN = pd.read_csv(os.getcwd()+'/output/pca_determinant_mn.csv', names=['Town', 'DET_MN'], skiprows=1)
-    DET_MN['rank_DET_MN'] = DET_MN.index+1
-    DET_MN.set_index('Town', inplace=True)
+    DET_MC = pd.read_csv(os.getcwd()+'/output/pca_determinant_mc.csv', names=['Town', 'DET_MC'], skiprows=1)
+    DET_MC['rank_DET_MC'] = DET_MC.index+1
+    DET_MC.set_index('Town', inplace=True)
     
     DET_STD = pd.read_csv(os.getcwd()+'/output/pca_determinant_std.csv', names=['Town', 'DET_STD'], skiprows=1)
     DET_STD['rank_DET_STD'] = DET_STD.index+1
     DET_STD.set_index('Town', inplace=True)
     
-    OUT_MN = pd.read_csv(os.getcwd()+'/output/pca_outcome_mn.csv', names=['Town', 'OUT_MN'], skiprows=1)
-    OUT_MN['rank_OUT_MN'] = OUT_MN.index+1
-    OUT_MN.set_index('Town', inplace=True)
+    OUT_MC = pd.read_csv(os.getcwd()+'/output/pca_outcome_mc.csv', names=['Town', 'OUT_MC'], skiprows=1)
+    OUT_MC['rank_OUT_MC'] = OUT_MC.index+1
+    OUT_MC.set_index('Town', inplace=True)
     
     OUT_STD = pd.read_csv(os.getcwd()+'/output/pca_outcome_std.csv', names=['Town', 'OUT_STD'], skiprows=1)
     OUT_STD['rank_OUT_STD'] = OUT_STD.index+1
     OUT_STD.set_index('Town', inplace=True)
      
-    ALL_MN_DEC = pd.read_csv(os.getcwd()+'//output/pca_decorrelated_all_mn.csv', names=['Town', 'ALL_MN_DEC'], skiprows=1)
-    ALL_MN_DEC['rank_ALL_MN_DEC'] = ALL_MN_DEC.index+1
-    ALL_MN_DEC.set_index('Town', inplace=True)
+    ALL_MC_DEC = pd.read_csv(os.getcwd()+'//output/pca_decorrelated_all_mc.csv', names=['Town', 'ALL_MC_DEC'], skiprows=1)
+    ALL_MC_DEC['rank_ALL_MC_DEC'] = ALL_MC_DEC.index+1
+    ALL_MC_DEC.set_index('Town', inplace=True)
     
     ALL_STD_DEC = pd.read_csv(os.getcwd()+'/output/pca_decorrelated_all_std.csv', names=['Town', 'ALL_STD_DEC'], skiprows=1)
     ALL_STD_DEC['rank_ALL_STD_DEC'] = ALL_STD_DEC.index+1
     ALL_STD_DEC.set_index('Town', inplace=True)
     
-    DET_MN_DEC = pd.read_csv(os.getcwd()+'/output/pca_decorreleated_determinant_mn.csv', names=['Town', 'DET_MN_DEC'], skiprows=1)
-    DET_MN_DEC['rank_DET_MN_DEC'] = DET_MN_DEC.index+1
-    DET_MN_DEC.set_index('Town', inplace=True)
+    DET_MC_DEC = pd.read_csv(os.getcwd()+'/output/pca_decorreleated_determinant_mc.csv', names=['Town', 'DET_MC_DEC'], skiprows=1)
+    DET_MC_DEC['rank_DET_MC_DEC'] = DET_MC_DEC.index+1
+    DET_MC_DEC.set_index('Town', inplace=True)
     
     DET_STD_DEC = pd.read_csv(os.getcwd()+'/output/pca_decorrelated_determinant_std.csv', names=['Town', 'DET_STD_DEC'], skiprows=1)
     DET_STD_DEC['rank_DET_STD_DEC'] = DET_STD_DEC.index+1
     DET_STD_DEC.set_index('Town', inplace=True)
     
-    OUT_MN_DEC = pd.read_csv(os.getcwd()+'/output/pca_decorrelated_outcome_mn.csv', names=['Town', 'OUT_MN_DEC'], skiprows=1)
-    OUT_MN_DEC['rank_OUT_MN_DEC'] = OUT_MN_DEC.index+1
-    OUT_MN_DEC.set_index('Town', inplace=True)
+    OUT_MC_DEC = pd.read_csv(os.getcwd()+'/output/pca_decorrelated_outcome_mc.csv', names=['Town', 'OUT_MC_DEC'], skiprows=1)
+    OUT_MC_DEC['rank_OUT_MC_DEC'] = OUT_MC_DEC.index+1
+    OUT_MC_DEC.set_index('Town', inplace=True)
     
     OUT_STD_DEC = pd.read_csv(os.getcwd()+'/output/pca_decorrelated_outcome_std.csv', names=['Town', 'OUT_STD_DEC'], skiprows=1)
     OUT_STD_DEC['rank_OUT_STD_DEC'] = OUT_STD_DEC.index+1
     OUT_STD_DEC.set_index('Town', inplace=True)
      
-    DOM_MN = pd.read_csv(os.getcwd()+'/output/pca_domains_mn.csv',\
-                          names=['index', 'BE_MN', 'CC_MN', 'ECON_MN', 'EDU_MN', 'EMP_MN', 'HEA_MN', 'HOU_MN', 'VIO_MN', 'AVG_MN'],\
+    DOM_MC = pd.read_csv(os.getcwd()+'/output/pca_domains_mc.csv',\
+                          names=['index', 'BE_MC', 'CC_MC', 'ECON_MC', 'EDU_MC', 'EMP_MC', 'HEA_MC', 'HOU_MC', 'VIO_MC', 'AVG_MC'],\
                           index_col='index', skiprows=1)
     DOM_STD = pd.read_csv(os.getcwd()+'/output/pca_domains_std.csv',\
                            names=['index', 'BE_STD', 'CC_STD', 'ECON_STD', 'EDU_STD', 'EMP_STD', 'HEA_STD', 'HOU_STD', 'VIO_STD', 'AVG_STD'],\
                            index_col='index', skiprows=1)
-    DOM_MN_DEC = pd.read_csv(os.getcwd()+'/output/pca_decorrelated_domains_mn.csv', \
-                            names=['index', 'BE_MN_DEC', 'CC_MN_DEC', 'ECON_MN_DEC', 'EDU_MN_DEC', 'EMP_MN_DEC', 'HEA_MN_DEC', 'HOU_MN_DEC', 'VIO_MN_DEC', 'AVG_MN_DEC'],\
+    DOM_MC_DEC = pd.read_csv(os.getcwd()+'/output/pca_decorrelated_domains_mc.csv', \
+                            names=['index', 'BE_MC_DEC', 'CC_MC_DEC', 'ECON_MC_DEC', 'EDU_MC_DEC', 'EMP_MC_DEC', 'HEA_MC_DEC', 'HOU_MC_DEC', 'VIO_MC_DEC', 'AVG_MC_DEC'],\
                             index_col='index', skiprows=1)
     DOM_STD_DEC = pd.read_csv(os.getcwd()+'/output/pca_decorrelated_domains_std.csv', \
                             names=['index', 'BE_STD_DEC', 'CC_STD_DEC', 'ECON_STD_DEC', 'EDU_STD_DEC', 'EMP_STD_DEC', 'HEA_STD_DEC', 'HOU_STD_DEC', 'VIO_STD_DEC', 'AVG_STD_DEC'],\
                             index_col='index', skiprows=1)
     
     # create subsets 
-    ALL = ALL_MN.join(ALL_STD, how='inner').join(ALL_MN_DEC, how='inner').join(ALL_STD_DEC, how='inner')
-    DET = DET_MN.join(DET_STD, how='inner').join(DET_MN_DEC, how='inner').join(DET_STD_DEC, how='inner')
-    OUT = OUT_MN.join(OUT_STD, how='inner').join(OUT_MN_DEC, how='inner').join(OUT_STD_DEC, how='inner')
+    ALL = ALL_MC.join(ALL_STD, how='inner').join(ALL_MC_DEC, how='inner').join(ALL_STD_DEC, how='inner')
+    DET = DET_MC.join(DET_STD, how='inner').join(DET_MC_DEC, how='inner').join(DET_STD_DEC, how='inner')
+    OUT = OUT_MC.join(OUT_STD, how='inner').join(OUT_MC_DEC, how='inner').join(OUT_STD_DEC, how='inner')
     
     for location in locations:
         
@@ -123,14 +123,14 @@ def visualize_scores(locations=['Boston', 'Amherst', 'Springfield']):
                 offset+=0.605
         
         # plots across domains
-        dom_df = pd.DataFrame({'Mean Normalized':{'Built Environment':DOM_MN.loc[location].values[0],
-                                                   'Community Context':DOM_MN.loc[location].values[1],
-                                                   'Economy':DOM_MN.loc[location].values[2],
-                                                   'Education':DOM_MN.loc[location].values[3],
-                                                   'Employment':DOM_MN.loc[location].values[4],
-                                                   'Health':DOM_MN.loc[location].values[5],
-                                                   'Housing':DOM_MN.loc[location].values[6],
-                                                   'Violence':DOM_MN.loc[location].values[7]},
+        dom_df = pd.DataFrame({'Mean Normalized':{'Built Environment':DOM_MC.loc[location].values[0],
+                                                   'Community Context':DOM_MC.loc[location].values[1],
+                                                   'Economy':DOM_MC.loc[location].values[2],
+                                                   'Education':DOM_MC.loc[location].values[3],
+                                                   'Employment':DOM_MC.loc[location].values[4],
+                                                   'Health':DOM_MC.loc[location].values[5],
+                                                   'Housing':DOM_MC.loc[location].values[6],
+                                                   'Violence':DOM_MC.loc[location].values[7]},
                                'Standardized':{'Built Environment':DOM_STD.loc[location].values[0],
                                                'Community Context':DOM_STD.loc[location].values[1],
                                                'Economy':DOM_STD.loc[location].values[2],
@@ -139,14 +139,14 @@ def visualize_scores(locations=['Boston', 'Amherst', 'Springfield']):
                                                'Health':DOM_STD.loc[location].values[5],
                                                'Housing':DOM_STD.loc[location].values[6],
                                                'Violence':DOM_STD.loc[location].values[7]},
-                               'Mean Normalized(Decorrelated)':{'Built Environment':DOM_MN_DEC.loc[location].values[0],
-                                                                'Community Context':DOM_MN_DEC.loc[location].values[1],
-                                                                'Economy':DOM_MN_DEC.loc[location].values[2],
-                                                                'Education':DOM_MN_DEC.loc[location].values[3],
-                                                                'Employment':DOM_MN_DEC.loc[location].values[4],
-                                                                'Health':DOM_MN_DEC.loc[location].values[5],
-                                                                'Housing':DOM_MN_DEC.loc[location].values[6],
-                                                                'Violence':DOM_MN_DEC.loc[location].values[7]},
+                               'Mean Normalized(Decorrelated)':{'Built Environment':DOM_MC_DEC.loc[location].values[0],
+                                                                'Community Context':DOM_MC_DEC.loc[location].values[1],
+                                                                'Economy':DOM_MC_DEC.loc[location].values[2],
+                                                                'Education':DOM_MC_DEC.loc[location].values[3],
+                                                                'Employment':DOM_MC_DEC.loc[location].values[4],
+                                                                'Health':DOM_MC_DEC.loc[location].values[5],
+                                                                'Housing':DOM_MC_DEC.loc[location].values[6],
+                                                                'Violence':DOM_MC_DEC.loc[location].values[7]},
                                'Standardized(Decorrelated)':{'Built Environment':DOM_STD_DEC.loc[location].values[0],
                                                              'Community Context':DOM_STD_DEC.loc[location].values[1],
                                                              'Economy':DOM_STD_DEC.loc[location].values[2],

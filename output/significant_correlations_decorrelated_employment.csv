@@ -1,4 +1,4 @@
-\,unemployment_rate,emp_business_%,emp_computer_%,emp_legal_%,emp_healthcare_%,emp_healthsupport_%,emp_protective_%,emp_foodprepare_%,emp_clean_%,emp_personalcare_%,emp_sales_%,emp_admin_%,emp_farm_%,emp_construct_%,emp_repair_%,emp_production_%,emp_transport_%,emp_material_%,emp_pop_ratio_wh_only,emp_pop_ratio_hisp,employed_male_%
+\,unemployment_rate,emp_business_%,emp_computer_%,emp_legal_%,emp_healthcare_%,emp_healthsupport_%,emp_protective_%,emp_foodprepare_%,emp_clean_%,emp_personalcare_%,emp_sales_%,emp_admin_%,emp_farm_%,emp_construct_%,emp_repair_%,emp_production_%,emp_transport_%,emp_material_%,emp_pop_ratio_wh_only,emp_pop_ratio_hisp,employed_female_%
 unemployment_rate,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
 emp_business_%,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
 emp_computer_%,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
@@ -19,4 +19,4 @@ emp_transport_%,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,
 emp_material_%,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
 emp_pop_ratio_wh_only,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
 emp_pop_ratio_hisp,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
-employed_male_%,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+employed_female_%,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0

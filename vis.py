@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-def visualize_pca_determinants(file_std, file_mn, file_all_std, file_all_mn, n, visualize_file):
+def visualize_pca_determinants(file_std, file_mc, file_all_std, file_all_mc, n, visualize_file):
     barWidth = 0.3
     _, ((ax0, ax1), (ax2, ax3)) = plt.subplots(2,2, figsize=(15,7))
 
@@ -14,7 +14,7 @@ def visualize_pca_determinants(file_std, file_mn, file_all_std, file_all_mn, n, 
     ax0.bar(x=v0.index,height=v0['Health Score'],width=barWidth, align='center', color='r')
     ax0.set_title('Standardized Data - Determinants only')
 
-    d1 = pd.read_csv(file_mn,index_col=0)
+    d1 = pd.read_csv(file_mc,index_col=0)
     t1 = d1.iloc[:n]
     b1= d1.iloc[-n:]
     v1 = pd.concat([t1,b1])
@@ -28,7 +28,7 @@ def visualize_pca_determinants(file_std, file_mn, file_all_std, file_all_mn, n, 
     ax2.bar(x=v2.index,height=v2['Health Score'],width=barWidth, align='center',color='r')
     ax2.set_title('Standardized Data')
 
-    d3 = pd.read_csv(file_all_mn,index_col=0)
+    d3 = pd.read_csv(file_all_mc,index_col=0)
     t3 = d3.iloc[:n]
     b3= d3.iloc[-n:]
     v3 = pd.concat([t3,b3])
@@ -38,7 +38,7 @@ def visualize_pca_determinants(file_std, file_mn, file_all_std, file_all_mn, n, 
     plt.tight_layout()
     plt.savefig(visualize_file)
 
-def visualize_pca_outcomes(file_std, file_mn, n, visualize_file):
+def visualize_pca_outcomes(file_std, file_mc, n, visualize_file):
     barWidth = 0.3
     _, ((ax0, ax1)) = plt.subplots(1,2, figsize=(15,7))
 
@@ -49,7 +49,7 @@ def visualize_pca_outcomes(file_std, file_mn, n, visualize_file):
     ax0.bar(x=v0.index,height=v0['Health Score'],width=barWidth, align='center', color='b')
     ax0.set_title('Standardized Data - Outcomes only')
 
-    d1 = pd.read_csv(file_mn,index_col=0)
+    d1 = pd.read_csv(file_mc,index_col=0)
     t1 = d1.iloc[:n]
     b1= d1.iloc[-n:]
     v1 = pd.concat([t1,b1])
@@ -185,15 +185,15 @@ def main():
     visualize_corr_mat('output/correlation_matrix_outcome.csv', 'visualizations/correlation_matrix_outcome_vis',  label_rotation=35, grid_size = 38, size_scale = 1300, legend_fs = 32)
     
     visualize_domains("output/pca_domains_std.csv", 5, 'STD')
-    visualize_domains("output/pca_domains_mn.csv", 5, 'MN')
+    visualize_domains("output/pca_domains_mc.csv", 5, 'MC')
         
-    compare_results('output/pca_determinant_mn.csv', 'output/pca_determinant_std.csv', 'visualizations/result_comparison_determinant', 'Determinant')
-    compare_results('output/pca_all_mn.csv', 'output/pca_all_std.csv', 'visualizations/result_comparison_all', 'All')
-    compare_results('output/pca_outcome_mn.csv', 'output/pca_outcome_std.csv', 'visualizations/result_comparison_outcome', 'Outcome')
-    compare_results_per_domain('output/pca_domains_mn.csv', 'output/pca_domains_std.csv', 'visualizations/result_comparison_domain')
+    compare_results('output/pca_determinant_mc.csv', 'output/pca_determinant_std.csv', 'visualizations/result_comparison_determinant', 'Determinant')
+    compare_results('output/pca_all_mc.csv', 'output/pca_all_std.csv', 'visualizations/result_comparison_all', 'All')
+    compare_results('output/pca_outcome_mc.csv', 'output/pca_outcome_std.csv', 'visualizations/result_comparison_outcome', 'Outcome')
+    compare_results_per_domain('output/pca_domains_mc.csv', 'output/pca_domains_std.csv', 'visualizations/result_comparison_domain')
 
-    visualize_pca_determinants('output/pca_determinant_std.csv','output/pca_determinant_mn.csv','output/pca_all_std.csv','output/pca_all_mn.csv',3,'visualizations/pca_high_low_3.png')
-    visualize_pca_outcomes('output/pca_outcome_std.csv','output/pca_outcome_mn.csv',3,'visualizations/outcome_high_low_3.png')
+    visualize_pca_determinants('output/pca_determinant_std.csv','output/pca_determinant_mc.csv','output/pca_all_std.csv','output/pca_all_mc.csv',3,'visualizations/pca_high_low_3.png')
+    visualize_pca_outcomes('output/pca_outcome_std.csv','output/pca_outcome_mc.csv',3,'visualizations/outcome_high_low_3.png')
 
     visualize_corr_mat('output/correlation_matrix_built_environment.csv', 'visualizations/correlation_matrix_built_environment_vis', label_fs = 26, label_rotation = 30, grid_size = 32, size_scale = 4000, legend_fs=32)
     visualize_corr_mat('output/correlation_matrix_community_context.csv', 'visualizations/correlation_matrix_community_context_vis', grid_size = 24, size_scale = 2000)
@@ -217,10 +217,10 @@ def main():
     visualize_corr_mat('output/correlation_matrix_decorrelated_housing.csv', 'visualizations/correlation_matrix_decorrelated_housing_vis', grid_size = 45, size_scale = 3000, legend_fs = 40)
     visualize_corr_mat('output/correlation_matrix_decorrelated_violence.csv', 'visualizations/correlation_matrix_decorrelated_violence_vis', grid_size = 32, size_scale = 30000, legend_fs=32)
 
-    compare_results('output/pca_decorreleated_determinant_mn.csv', 'output/pca_decorrelated_determinant_std.csv', 'visualizations/result_comparison_decorrelated_determinant', 'Decorrelated Determinant')
-    compare_results('output/pca_decorrelated_all_mn.csv', 'output/pca_decorrelated_all_std.csv', 'visualizations/result_comparison_decorrelated_all', 'Decorrelated All')
-    compare_results('output/pca_decorrelated_outcome_mn.csv', 'output/pca_decorrelated_outcome_std.csv', 'visualizations/result_comparison_decorrelated_outcome', 'Decorrelated Outcome')
-    compare_results_per_domain('output/pca_decorrelated_domains_mn.csv', 'output/pca_decorrelated_domains_std.csv', 'visualizations/result_comparison_decorrelated_domain')
+    compare_results('output/pca_decorreleated_determinant_mc.csv', 'output/pca_decorrelated_determinant_std.csv', 'visualizations/result_comparison_decorrelated_determinant', 'Decorrelated Determinant')
+    compare_results('output/pca_decorrelated_all_mc.csv', 'output/pca_decorrelated_all_std.csv', 'visualizations/result_comparison_decorrelated_all', 'Decorrelated All')
+    compare_results('output/pca_decorrelated_outcome_mc.csv', 'output/pca_decorrelated_outcome_std.csv', 'visualizations/result_comparison_decorrelated_outcome', 'Decorrelated Outcome')
+    compare_results_per_domain('output/pca_decorrelated_domains_mc.csv', 'output/pca_decorrelated_domains_std.csv', 'visualizations/result_comparison_decorrelated_domain')
     
 def value_to_color(val):
     n_colors = 256

@@ -4,8 +4,8 @@ Dover,0.01
 Weston,0.01
 Wayland,0.05
 Wellesley,0.06
-Lexington,0.07
-Gosnold,0.08
+Gosnold,0.07
+Lexington,0.08
 Sherborn,0.08
 Sudbury,0.09
 Lincoln,0.11
@@ -32,9 +32,9 @@ Groton,0.19
 Manchester-by-the-Sea,0.19
 Acton,0.2
 Hingham,0.2
+Norfolk,0.2
 Alford,0.21
 Boxford,0.21
-Norfolk,0.21
 Stow,0.21
 Duxbury,0.22
 Marblehead,0.22
@@ -71,9 +71,10 @@ Mendon,0.28
 Newbury,0.28
 Newburyport,0.28
 North Reading,0.28
+Richmond,0.28
 Franklin,0.29
 North Andover,0.29
-Richmond,0.29
+Wrentham,0.29
 Berlin,0.3
 Conway,0.3
 Georgetown,0.3
@@ -81,7 +82,6 @@ Marion,0.3
 Melrose,0.3
 Upton,0.3
 West Stockbridge,0.3
-Wrentham,0.3
 Chilmark,0.31
 Shrewsbury,0.31
 Walpole,0.31
@@ -101,18 +101,19 @@ Shutesbury,0.33
 Sterling,0.33
 Tyngsborough,0.33
 Whately,0.33
+Ipswich,0.34
 Leyden,0.34
 Merrimac,0.34
+Millis,0.34
 Stockbridge,0.34
 Washington,0.34
 Watertown,0.34
 Westhampton,0.34
+Westminster,0.34
 Wilbraham,0.34
 Deerfield,0.35
 Hopedale,0.35
-Ipswich,0.35
 Mattapoisett,0.35
-Millis,0.35
 Monterey,0.35
 Orleans,0.35
 Paxton,0.35
@@ -121,7 +122,6 @@ Sturbridge,0.35
 Sutton,0.35
 Townsend,0.35
 Warwick,0.35
-Westminster,0.35
 Wilmington,0.35
 Worthington,0.35
 Brewster,0.36
@@ -135,27 +135,28 @@ Maynard,0.36
 Rehoboth,0.36
 Southampton,0.36
 Stoneham,0.36
+Tolland,0.36
 Wakefield,0.36
 East Longmeadow,0.37
 Edgartown,0.37
 Mount Washington,0.37
+New Marlborough,0.37
+Norton,0.37
 Petersham,0.37
 Rochester,0.37
-Tolland,0.37
 Ashburnham,0.38
 Ashfield,0.38
 Brimfield,0.38
 Foxborough,0.38
+Hampden,0.38
 Middlefield,0.38
 Middleton,0.38
-New Marlborough,0.38
 Northampton,0.38
-Norton,0.38
 Pembroke,0.38
 Ayer,0.39
 Dighton,0.39
 Douglas,0.39
-Hampden,0.39
+Lakeville,0.39
 Lancaster,0.39
 Marshfield,0.39
 Oakham,0.39
@@ -171,7 +172,6 @@ Granby,0.4
 Hanson,0.4
 Hatfield,0.4
 Kingston,0.4
-Lakeville,0.4
 Medford,0.4
 North Attleborough,0.4
 Raynham,0.4
@@ -189,6 +189,7 @@ Rowe,0.41
 Ashby,0.42
 Becket,0.42
 Danvers,0.42
+Eastham,0.42
 Groveland,0.42
 Montgomery,0.42
 Nantucket,0.42
@@ -199,7 +200,7 @@ Plainville,0.42
 Uxbridge,0.42
 Amesbury,0.43
 Beverly,0.43
-Eastham,0.43
+Charlton,0.43
 New Ashford,0.43
 New Braintree,0.43
 New Salem,0.43
@@ -209,8 +210,8 @@ Sheffield,0.43
 Somerville,0.43
 South Hadley,0.43
 Southwick,0.43
-Charlton,0.44
 Chesterfield,0.44
+Cummington,0.44
 Dracut,0.44
 Freetown,0.44
 Gill,0.44
@@ -219,16 +220,16 @@ Hawley,0.44
 Heath,0.44
 Hull,0.44
 Huntington,0.44
+Mashpee,0.44
 Truro,0.44
 West Boylston,0.44
 West Bridgewater,0.44
 Woburn,0.44
 Bellingham,0.45
-Cummington,0.45
 East Bridgewater,0.45
 Falmouth,0.45
 Lanesborough,0.45
-Mashpee,0.45
+Monson,0.45
 Northfield,0.45
 Swansea,0.45
 Bernardston,0.46
@@ -238,11 +239,11 @@ Dartmouth,0.46
 Hinsdale,0.46
 Leicester,0.46
 Millville,0.46
-Monson,0.46
 Plymouth,0.46
 Templeton,0.46
 Waltham,0.46
 Wellfleet,0.46
+West Brookfield,0.46
 Abington,0.47
 Bridgewater,0.47
 Brookfield,0.47
@@ -250,7 +251,7 @@ Carver,0.47
 Holland,0.47
 Northbridge,0.47
 Stoughton,0.47
-West Brookfield,0.47
+Agawam,0.48
 Blandford,0.48
 Clarksburg,0.48
 Dalton,0.48
@@ -258,8 +259,8 @@ Middleborough,0.48
 Millbury,0.48
 Whitman,0.48
 Acushnet,0.49
-Agawam,0.49
 Blackstone,0.49
+Dudley,0.49
 Gloucester,0.49
 Hardwick,0.49
 Lee,0.49
@@ -268,31 +269,31 @@ Phillipston,0.49
 Russell,0.49
 Tisbury,0.49
 Weymouth,0.49
-Dudley,0.5
 Fairhaven,0.5
 Great Barrington,0.5
 Harwich,0.5
 Otis,0.5
 Quincy,0.5
+Rockland,0.5
 Sunderland,0.5
 Avon,0.51
 Ludlow,0.51
 North Brookfield,0.51
 Oxford,0.51
 Peabody,0.51
-Rockland,0.51
 Saugus,0.51
 Wales,0.51
+Winthrop,0.51
 Attleboro,0.52
 Dennis,0.52
 Easthampton,0.52
 Halifax,0.52
 Holbrook,0.52
+Marlborough,0.52
 Somerset,0.52
 Wendell,0.52
-Winthrop,0.52
-Marlborough,0.53
 Methuen,0.53
+Shirley,0.53
 Yarmouth,0.53
 Barnstable,0.54
 Clinton,0.54
@@ -302,7 +303,6 @@ Peru,0.54
 Provincetown,0.54
 Royalston,0.54
 Salisbury,0.54
-Shirley,0.54
 Savoy,0.55
 Spencer,0.55
 Westfield,0.55
@@ -330,8 +330,8 @@ Wareham,0.61
 Warren,0.61
 West Springfield,0.61
 Malden,0.62
+Pittsfield,0.62
 Ware,0.62
-Pittsfield,0.63
 Gardner,0.64
 Webster,0.65
 Chicopee,0.66

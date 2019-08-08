@@ -12,7 +12,8 @@ import matplotlib.pyplot as plt
 plt.style.use('ggplot')
 plt.rcParams['figure.figsize'] = (11, 7)
 
-def visualize_scores(locations=['Boston', 'Amherst', 'Springfield']):
+# def visualize_scores(locations=['Boston', 'Amherst', 'Springfield']):
+def visualize_scores(locations=['Boston']):
     
     """ Creates bar plots for every town in ``locations`` """
     
@@ -90,13 +91,13 @@ def visualize_scores(locations=['Boston', 'Amherst', 'Springfield']):
         vals_OUT = OUT.loc[location]
         
         # plots across subsets
-        sub_df = pd.DataFrame({'Mean Normalized':{'Determinants data':vals_DET.values[0], \
+        sub_df = pd.DataFrame({'Mean Centered':{'Determinants data':vals_DET.values[0], \
                                                    'Outcomes data':vals_OUT.values[0],
                                                    'All data':vals_ALL.values[0]}, \
                                'Standardized':{'Determinants data':vals_DET.values[2], \
                                                'Outcomes data':vals_OUT.values[2],
                                                'All data':vals_ALL.values[2]},
-                               'Mean Normalized(Decorrelated)':{'Determinants data':vals_DET.values[4], \
+                               'Mean Centered(Decorrelated)':{'Determinants data':vals_DET.values[4], \
                                                                 'Outcomes data':vals_OUT.values[4],
                                                                 'All data':vals_ALL.values[4]},
                                'Standardized(Decorrelated)':{'Determinants data':vals_DET.values[6], \
@@ -121,9 +122,9 @@ def visualize_scores(locations=['Boston', 'Amherst', 'Springfield']):
             ax.text((i*0.1)-0.2+offset, v+0.01, int(ranks[i]), color='black', fontweight='bold', fontsize=9)
             if (i+1)%4==0:
                 offset+=0.605
-        
+
         # plots across domains
-        dom_df = pd.DataFrame({'Mean Normalized':{'Built Environment':DOM_MC.loc[location].values[0],
+        dom_df = pd.DataFrame({'Mean Centered':{'Built Environment':DOM_MC.loc[location].values[0],
                                                    'Community Context':DOM_MC.loc[location].values[1],
                                                    'Economy':DOM_MC.loc[location].values[2],
                                                    'Education':DOM_MC.loc[location].values[3],
@@ -139,7 +140,7 @@ def visualize_scores(locations=['Boston', 'Amherst', 'Springfield']):
                                                'Health':DOM_STD.loc[location].values[5],
                                                'Housing':DOM_STD.loc[location].values[6],
                                                'Violence':DOM_STD.loc[location].values[7]},
-                               'Mean Normalized(Decorrelated)':{'Built Environment':DOM_MC_DEC.loc[location].values[0],
+                               'Mean Centered(Decorrelated)':{'Built Environment':DOM_MC_DEC.loc[location].values[0],
                                                                 'Community Context':DOM_MC_DEC.loc[location].values[1],
                                                                 'Economy':DOM_MC_DEC.loc[location].values[2],
                                                                 'Education':DOM_MC_DEC.loc[location].values[3],

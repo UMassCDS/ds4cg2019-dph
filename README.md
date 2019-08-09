@@ -1,14 +1,31 @@
 # ds4cg2019-dph
 
-# Structure
-1. pca.py - runs pca on the correlation matrix for all the health determinants. Output - overall health score - pca_1.csv, Factor loadings - loadings_1.csv
-2. factor_scores.py - runs pca on the original data for all health determinants. Output - overall health score - pca_2.csv
-3. pca_perdomain.py - runs pca on health determinants belonging to every domain. Output - 
-4. component_scores.py - finds the component scores of every health determinant. Output - 
-
 ### data 
-Input data 
+Folder that contains all data that is used as the input for this process.
 
 ### output 
-Output data 
+Folder that contains files that reflect the different outputs for this process.
+This files only contain numbers and values, they do not convey semantics.
+
+### visualizations
+Folder that contains visualizations of the different files within the output folder.
+
+##result_projections
+Folder that contains D3 code to visualize the results of the composite Health Score, and project them onto a map of the state of Massachusetts.
+
+###build_fulldataset.py
+
+###clean.py
+
+###impute.py
+
+###pca.py
+
+###run.py
+
+###visualize.py
+
+###visualize_communities.py
+
+
 

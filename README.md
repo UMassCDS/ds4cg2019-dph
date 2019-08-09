@@ -1,5 +1,15 @@
 # ds4cg2019-dph
 
+### Setup and Running Code
+#### Install Requirements
+1. Run ```pip freeze > requirements.txt```
+2. Run ```pip install -r requirements.txt```
+
+#### Run Code
+1. After setting file variables in ```run.py```, run the code using ```python run.py```
+2. For visualizations of correlation matrices, bar charts for health scores for Top 3 and Bottom 3 communities, ```python visualize.py```
+3. For visualizations of specific communities, ```python visualize_communities.py```
+
 ### data 
 Folder that contains all data that is used as the input for this process.
 

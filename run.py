@@ -200,6 +200,7 @@ DC_ALL_MC = {'cols_filepath':"data/decorrelated_all_data_mc_columns.csv",
 
 '''
 Function to generate results on fully correlated data
+NOTE: Follow order specified below to run results, as output of certain functions and calculations are used in the subsequent functions 
 '''
 def generate_results():
     health_obj = HealthScores(DETERMINANT_STD)
@@ -257,6 +258,7 @@ def generate_results():
 
 '''
 Function to generate results on decorrelated data
+NOTE: Follow order specified below to run results, as output of certain functions and calculations are used in the subsequent functions 
 '''
 def generate_decorrelated_results():
     health_obj = HealthScores(DC_DETERMINANT_STD)

@@ -141,4 +141,3 @@ print('\n')
 print("COLUMNS THAT HAD TO BE CONVERTED TO PERCENT")
 print(perc)
 print('\n')
-'''

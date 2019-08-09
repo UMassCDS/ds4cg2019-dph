@@ -3,6 +3,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 
+'''
+Plot health scores for top n and bottom n towns for determinants
+'''
 def visualize_pca_determinants(file_std, file_mc, file_all_std, file_all_mc, n, visualize_file):
     barWidth = 0.3
     _, ((ax0, ax1), (ax2, ax3)) = plt.subplots(2,2, figsize=(15,7))
@@ -38,6 +41,9 @@ def visualize_pca_determinants(file_std, file_mc, file_all_std, file_all_mc, n, 
     plt.tight_layout()
     plt.savefig(visualize_file)
 
+'''
+Plot health scores for top n and bottom n towns for outcomes
+'''
 def visualize_pca_outcomes(file_std, file_mc, n, visualize_file):
     barWidth = 0.3
     _, ((ax0, ax1)) = plt.subplots(1,2, figsize=(15,7))
@@ -59,6 +65,9 @@ def visualize_pca_outcomes(file_std, file_mc, n, visualize_file):
     plt.tight_layout()
     plt.savefig(visualize_file)
 
+'''
+Plot health scores (bottom n avg domain scores) per domain 
+'''    
 def visualize_domains(file_path, n, ver):
     domain_data = pd.read_csv(file_path, index_col=0).sort_values(by='AVG')
     domain_names = list(domain_data)
@@ -94,6 +103,9 @@ def visualize_domains(file_path, n, ver):
     plt.legend()
     plt.savefig('visualizations/score_per_domain_' + ver.lower())
 
+'''
+Function to visualize the correlation matrix
+'''
 def visualize_corr_mat(file_path, write_path, grid_size = 35, size_scale = 80, legend_fs = 24, label_fs = 24, label_rotation = 45):
     corr_mat = pd.read_csv(file_path, index_col=0)
     features = list(corr_mat)
@@ -235,6 +247,9 @@ def value_to_color(val):
             res = palette[255]
     return res
 
+'''
+Function to compare covariance results to correlation results
+'''
 def compare_results(cov_file, corr_file, write_file, sub_set):
     cov = pd.read_csv(cov_file, index_col=0)
     cov.rename(columns={'Health Score':'COV'}, inplace=True)
@@ -252,6 +267,9 @@ def compare_results(cov_file, corr_file, write_file, sub_set):
     plt.ylabel('Correlation Matrix Results')
     plt.savefig(write_file)
 
+'''
+Function to compare covariance results to correlation results per domain 
+'''
 def compare_results_per_domain(cov_file, corr_file, write_file):
     cov = pd.read_csv(cov_file, index_col=0)
     corr = pd.read_csv(corr_file, index_col=0)

@@ -324,10 +324,11 @@ class HealthScores():
         Print and calculate the eigenvector correlations that account 
         for feature scores in the health score calculations
         Args:
-            
+            None
         Returns:
-            
+            None
         '''
+        # Extracts the loadings from the PCA calculation in calc_pca
         load_table = []
         for i in range(self.n):
             load_table.append(self.var_load[:, i])
@@ -340,11 +341,20 @@ class HealthScores():
 
         load_table = np.concatenate((features, load_table), axis = 1)
 
+        # write to file
         df = pd.DataFrame(data=load_table, columns = pc_headers)
         df.set_index('Feature',inplace=True)
         df.to_csv(self.loadings_file)
     
     def load_domains(self):
+        '''
+        Function to load domain data from the entire dataset. Reads the GLOBAL DOMAINS keys to extract domain specific data 
+        from the full dataset. 
+        Args:
+            None
+        Returns:
+            domain_data: Dictionary containing domain data 
+        '''
         columns = self.extract_features()
         domains_by_no = {}
         determinant_data = pd.read_csv(self.data, index_col=0)
@@ -364,11 +374,21 @@ class HealthScores():
         return domain_data
     
     def score_per_domain(self):
+        '''
+        Function to calculate the health score by running PCA on each individual domain. 
+        Writes the output of PCA per domain to the domain specific file 
+        Args:
+            None
+        Returns:
+            None
+        '''
+        #Extract columns, original full dataset and the reference feature number 
         columns = self.extract_features()
         domains_by_no = {}
         determinant_data = pd.read_csv(self.data, index_col=0)
         true_num = list(determinant_data)
 
+        # Map every feature to domain
         for d in self.domains:
             for indi in self.domains[d]:
                 try:
@@ -376,6 +396,7 @@ class HealthScores():
                 except KeyError:
                     domains_by_no[d] = [str(true_num[columns.index(indi)])]
 
+        # Call on calc_pca to return the scores for each individual domain
         domain_scores = []
         for dom in domains_by_no:
             domain_data = determinant_data[domains_by_no[dom]]
@@ -384,6 +405,7 @@ class HealthScores():
             else:
                 domain_scores.append([round(x,2) for x in MinMaxScaler().fit_transform(np.array(domain_data)).flatten()])
         
+        # Round the health scores per domain and write to file 
         domain_scores = np.array(domain_scores).T
         avg_dom = np.array([[round(x,2) for x in np.average(domain_scores, axis =1)]]).T
         domain_scores = np.concatenate((domain_scores, avg_dom), axis = 1)
@@ -398,19 +420,41 @@ class HealthScores():
         df.to_csv(self.domain_file)
 
     def write_corr_mat(self):
+        '''
+        Function to write the correlation matrix to file. 
+        Args:
+            None
+        Returns: 
+            None
+        '''
+        # Uses the calc_corr_mat function to calculate the correlation matrix of the data
         A = self.calc_corr_mat(self.load_data())
+        # Extracts and maps correct features to the columns
         feat = np.array([self.extract_features()]).T
+        # combines correlation data with the feature names
         A = np.concatenate((feat, A), axis = 1)
         headers = ["\\"] + self.extract_features()
         
+        # Writes correlation matrix to file 
         df = pd.DataFrame(data = A, columns = headers)
         df.set_index("\\", inplace = True)
         
         df.to_csv(self.corrmat_file)
     
     def write_corr_mat_per_dom(self):
+        '''
+        Function to write the correlation matrix per domain to domain specific files. 
+        Args:
+            None
+        Returns: 
+            None
+        '''
+        # Extract domain specific data
         data = self.load_domains()
+        # Retain the original column ordering 
         true_num = list(pd.read_csv(self.data, index_col=0))
+
+        # For every domain, use calc_corr_mat to do correlation analysis and write to file 
         for d in self.domains:
             curr = data[d]
             col = list(curr)
@@ -435,6 +479,13 @@ class HealthScores():
                 df.to_csv('output/correlation_matrix_' + d + '.csv')
     
     def p_values(self, data):
+        '''
+        Function to calculate p values for the data matrix 
+        Args:
+            data: data array
+        Returns: 
+            numpy array of p values
+        '''
         _,N = data.shape
         pvals = []
         for i in range(N):
@@ -446,6 +497,13 @@ class HealthScores():
         return np.array(pvals)
     
     def write_p_values(self):
+        '''
+        Function to write the p value matrix to specific file
+        Args:
+            None
+        Returns:
+            None
+        '''
         data = self.load_data()
         pvals = self.p_values(data)
         feat = self.extract_features()
@@ -457,6 +515,13 @@ class HealthScores():
         df.to_csv(self.pvalue_file)
     
     def write_p_values_per_dom(self):
+        '''
+        Function to write the domain specific p value matrix to domain file
+        Args:
+            None
+        Returns:
+            None
+        '''
         data = self.load_domains()
         true_num = list(pd.read_csv(self.data, index_col=0))
         for d in self.domains:
@@ -481,6 +546,17 @@ class HealthScores():
                 df.to_csv('output/p_values_'+d+'.csv')
     
     def write_significant_correlations(self, cm_file, pval_file, write_file):
+        '''
+        Function to write significant correlations to separate file
+        Significant correlations are those that have a r**2 > 0.8 and pval < 0.05
+        The rest of correlations are made to be zero, so only significant correlations are > 0.0
+        Args:
+            cm_file: correlation matrix file
+            pval_file: p value file
+            write_file: output significant correlations file
+        Returns:
+            None
+        '''
         cm = pd.read_csv(cm_file, index_col = 0)
         feat = list(cm)
         cm = np.array(cm)
@@ -499,6 +575,16 @@ class HealthScores():
         df.to_csv(write_file)
     
     def correlation_analysis(self):
+        '''
+        Function to drop signficant correlations from the original data and form decorrelated data sets. 
+        Reads from the significant correlations file and drops all the columns (from least important features on factor analysis)
+        The output data is written into data folder as decorrelated output
+        Args:
+            None
+        Returns:
+            None 
+        Prints the names of the columns that were dropped in every subset of PCA calculations
+        '''
         inp, sorted_mag = self.factor_analysis()
         sig_corr = pd.read_csv(self.sigcorr_file, index_col=0)
 

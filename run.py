@@ -5,6 +5,10 @@ if not sys.warnoptions:
     import warnings
     warnings.simplefilter("ignore")
 
+
+# SUBSET - DETERMINANT DATA 
+# VER - STANDARDIZED 
+# DC - FALSE (NON-DECORRELATED)
 DETERMINANT_STD = {'cols_filepath':"data/health_determinants.csv", 
                     'data_filepath':"data/determinant_data_std.csv",
                     'pca_filepath':"output/pca_determinant_std.csv", 
@@ -18,6 +22,9 @@ DETERMINANT_STD = {'cols_filepath':"data/health_determinants.csv",
                     'VER':'std',
                     'DC':False}
 
+# SUBSET - DETERMINANT DATA 
+# VER - MEAN CENTERED 
+# DC - FALSE (NON-DECORRELATED)
 DETERMINANT_MC = {'cols_filepath':"data/health_determinants.csv",
                     'data_filepath':"data/determinant_data_mc.csv",
                     'pca_filepath':"output/pca_determinant_mc.csv", 
@@ -31,6 +38,9 @@ DETERMINANT_MC = {'cols_filepath':"data/health_determinants.csv",
                     'VER':'mc',
                     'DC':False}
 
+# SUBSET - OUTCOME DATA 
+# VER - STANDARDIZED 
+# DC - FALSE (NON-DECORRELATED)
 OUTCOME_STD = {'cols_filepath':"data/health_outcomes.csv",
                 'data_filepath':"data/outcome_data_std.csv",
                 'pca_filepath':"output/pca_outcome_std.csv", 
@@ -44,6 +54,9 @@ OUTCOME_STD = {'cols_filepath':"data/health_outcomes.csv",
                 'VER':'std',
                 'DC':False}
 
+# SUBSET - OUTCOME DATA 
+# VER - MEAN CENTERED 
+# DC - FALSE (NON-DECORRELATED)
 OUTCOME_MC = {'cols_filepath':"data/health_outcomes.csv", 
                 'data_filepath':"data/outcome_data_mc.csv",
                 'pca_filepath':"output/pca_outcome_mc.csv",
@@ -57,6 +70,9 @@ OUTCOME_MC = {'cols_filepath':"data/health_outcomes.csv",
                 'VER':'mc',
                 'DC':False}
 
+# SUBSET - DETERMINANT + OUTCOME DATA 
+# VER - STANDARDIZED 
+# DC - FALSE (NON-DECORRELATED)
 ALL_STD = {'cols_filepath':"data/all_data.csv",
             'data_filepath':"data/all_data_std.csv",
             'pca_filepath':"output/pca_all_std.csv",
@@ -70,6 +86,9 @@ ALL_STD = {'cols_filepath':"data/all_data.csv",
             'VER':'std',
             'DC':False}
 
+# SUBSET - DETERMINANT + OUTCOME DATA 
+# VER - MEAN CENTERED 
+# DC - FALSE (NON-DECORRELATED)
 ALL_MC = {'cols_filepath':"data/all_data.csv",
             'data_filepath':"data/all_data_mc.csv",
             'pca_filepath':"output/pca_all_mc.csv",
@@ -83,6 +102,9 @@ ALL_MC = {'cols_filepath':"data/all_data.csv",
             'VER':'mc',
             'DC':False}
 
+# SUBSET - DETERMINANT DATA 
+# VER - STANDARDIZED 
+# DC - TRUE (DECORRELATED)
 DC_DETERMINANT_STD = {'cols_filepath':"data/decorrelated_determinant_data_std_columns.csv",
                         'data_filepath':"data/decorrelated_determinant_data_std.csv",
                         'pca_filepath':"output/pca_decorrelated_determinant_std.csv",
@@ -96,6 +118,9 @@ DC_DETERMINANT_STD = {'cols_filepath':"data/decorrelated_determinant_data_std_co
                         'VER':'std',
                         'DC':True}
 
+# SUBSET - DETERMINANT DATA 
+# VER - MEAN CENTERED 
+# DC - TRUE (DECORRELATED)
 DC_DETERMINANT_MC = {'cols_filepath':"data/decorrelated_determinant_data_mc_columns.csv",
                     'data_filepath':"data/decorrelated_determinant_data_mc.csv",
                     'pca_filepath':"output/pca_decorreleated_determinant_mc.csv", 
@@ -109,6 +134,9 @@ DC_DETERMINANT_MC = {'cols_filepath':"data/decorrelated_determinant_data_mc_colu
                     'VER':'mc',
                     'DC':True}
 
+# SUBSET - OUTCOME DATA 
+# VER - STANDARDIZED 
+# DC - TRUE (DECORRELATED)
 DC_OUTCOME_STD = {'cols_filepath':"data/decorrelated_outcome_data_std_columns.csv",
                 'data_filepath':"data/decorrelated_outcome_data_std.csv",
                 'pca_filepath':"output/pca_decorrelated_outcome_std.csv", 
@@ -122,6 +150,9 @@ DC_OUTCOME_STD = {'cols_filepath':"data/decorrelated_outcome_data_std_columns.cs
                 'VER':'std',
                 'DC':True}
 
+# SUBSET - OUTCOME DATA 
+# VER - MEAN CENTERED 
+# DC - TRUE (DECORRELATED)
 DC_OUTCOME_MC = {'cols_filepath':"data/decorrelated_outcome_data_mc_columns.csv", 
                 'data_filepath':"data/decorrelated_outcome_data_mc.csv",
                 'pca_filepath':"output/pca_decorrelated_outcome_mc.csv",
@@ -135,6 +166,9 @@ DC_OUTCOME_MC = {'cols_filepath':"data/decorrelated_outcome_data_mc_columns.csv"
                 'VER':'mc',
                 'DC':True}
 
+# SUBSET - DETERMINANT + OUTCOME DATA 
+# VER - STANDARDIZED 
+# DC - TRUE (DECORRELATED)
 DC_ALL_STD = {'cols_filepath':"data/decorrelated_all_data_std_columns.csv",
             'data_filepath':"data/decorrelated_all_data_std.csv",
             'pca_filepath':"output/pca_decorrelated_all_std.csv",
@@ -148,6 +182,9 @@ DC_ALL_STD = {'cols_filepath':"data/decorrelated_all_data_std_columns.csv",
             'VER':'std',
             'DC':True}
 
+# SUBSET - DETERMINANT + OUTCOME DATA 
+# VER - MEAN CENTERED 
+# DC - TRUE (DECORRELATED)
 DC_ALL_MC = {'cols_filepath':"data/decorrelated_all_data_mc_columns.csv",
             'data_filepath':"data/decorrelated_all_data_mc.csv",
             'pca_filepath':"output/pca_decorrelated_all_mc.csv",
@@ -161,6 +198,9 @@ DC_ALL_MC = {'cols_filepath':"data/decorrelated_all_data_mc_columns.csv",
             'VER':'mc',
             'DC':True}
 
+'''
+Function to generate results on fully correlated data
+'''
 def generate_results():
     health_obj = HealthScores(DETERMINANT_STD)
     health_obj.calc_pca(write=True)
@@ -215,6 +255,9 @@ def generate_results():
     health_obj.factor_analysis(write=True)
     health_obj.correlation_analysis()
 
+'''
+Function to generate results on decorrelated data
+'''
 def generate_decorrelated_results():
     health_obj = HealthScores(DC_DETERMINANT_STD)
     health_obj.calc_pca(write=True)

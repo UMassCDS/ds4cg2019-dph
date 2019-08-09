@@ -8,6 +8,12 @@ from scipy.misc import logsumexp
 import collections
 from factor_analyzer import FactorAnalyzer
 
+"""
+Define global variables that breaks down indicators into domains. 
+Keys: domain names
+Values: feature names 
+Invoked when the dataset has to be split into domains and each domain is handled separately.
+"""
 GLOBAL_DOMAINS = {'built_environment':['no_vehicle_avail_%', 'comm_car_%', 'comm_carpool_%', 'comm_bus_%', 'comm_walk_%',\
                     'comm_cycle_%', 'comm_taxi_%', 'comm_wfh_%','tobbaco_retailers_2019_%', 'liquor_per1000', 'supermarket_per1000', 
                     'food_est_per1000'], 
@@ -38,11 +44,29 @@ GLOBAL_DOMAINS = {'built_environment':['no_vehicle_avail_%', 'comm_car_%', 'comm
 
 class HealthScores():
     '''
-    Get healthscores for all towns
+    HealthScores class creates an object of type healthscore. Contains functions for all Principal Component Analysis parts, 
+    and factor analysis as well as correlation analysis. 
+    Attributes:
+        read_cols:  File to read the column names 
+        data: File to read the input data
+        output: File to store the output health scores
+        loadings_file: File to output the feature scores (factor scores in the paper)
+        domain_file: File to write the scores by domain 
+        corrmat_file: File to write the correlation matrix
+        pvalue_file: File to write the p value matrix
+        fa_file: File to write the factor analysis outputs 
+        sigcorr_file: File to write the significant correlations 
+        decorrelated_file: File to write the decorrelated data
+        VER: stores the version of every file (std/mc)
+        DC: flag to show if functions are performed on correlated/decorrelated data
+        domains: dictionary holding the domain data 
+        var_load: hold significant eigenvector correlations from pca 
+        n: chosen number of principal components
+        pca: represents the output of pca (follows the implementation from the sklearn library: https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.PCA.html)
     '''
     def __init__(self, INFO):
         '''
-        Initialize variables
+        Initialize variables when an object of class HealthScores is created. 
         '''
         self.read_cols = INFO['cols_filepath']
         self.data = INFO['data_filepath']
@@ -74,14 +98,18 @@ class HealthScores():
         
     def extract_features(self):
         """
-        To extract the column headers so we can map PC components to relevant factors
+        To extract the column headers so we can map PC components to relevant features 
+        Returns: 
+            List of column names 
         """
         data = pd.read_csv(self.read_cols, index_col=0)
         return list(data.columns)
 
     def extract_towns(self):
         """
-        Extract the town names, so that health score can have meaning
+        Extract the town names from the data file. (Allows easy conversion from named index to numbered index)
+        Returns:
+            List of town names in alphabetical order 
         """
         data = pd.read_csv('data/health_determinants.csv', index_col=0)
         towns = list(data.index)
@@ -89,8 +117,19 @@ class HealthScores():
 
     def calc_pca(self, write=True, dom_data=(None, None), explain_fa_dfilepath=None):
         """
-        Method to calculate factor scores
+        Method to perform Principal Component Analysis. Steps performed in this function are referenced from the following source - 
+        https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5065523/
+        Args: 
+            write: Boolean variable to change whether output is written to a file or not (True: writes output to file)
+            dom_data(None, None): contains the flag and data that is passed, if PCA is being performed on each domain 
+                dom_data[0]: Flag to show if domains are present 
+                dom_data[1]: Contains domain data subset 
+            explain_fa_filepath: contains file path for writing factor analysis results per domain 
+        Returns: 
+            scores: list of scores for towns in alphabetical order 
         """
+        # Check if the function is acting on domain data, if True, then set Kaiser condition cutoff to 0.01, 
+        # else the cutoff is 1.0 
         data = None
         cut_off = None
         if dom_data[0]:
@@ -99,21 +138,24 @@ class HealthScores():
         else:
             data = pd.read_csv(self.data, index_col=0)
             cut_off = 1.0
-        determinant_data = np.array(data)
-        #find the number of variables
-        num_var = determinant_data.shape[1]
 
-        #calc is the choose the factor loadings
+        # Convert data to numpy array for further processing 
+        loaded_data = np.array(data)
+
+        #find the number of variables
+        num_var = loaded_data.shape[1]
+
+        #calc is the cutoff to find which eigenvector correlations are significant 
         calc = np.abs(np.sqrt(1/num_var))
 
         #cov_mat is the covariance matrix of the data
-        cov_mat = np.cov(determinant_data.T)
+        cov_mat = np.cov(loaded_data.T)
         
         #perform PCA on the covariance matrix
         self.pca = PCA()
         self.pca.fit(cov_mat)
         
-        # kaiser criterion : Components with eigen_values > 1.0 should be retained
+        # kaiser criterion : Components with eigen_values > cut_off should be retained
         selected_components = np.argwhere(self.pca.explained_variance_>cut_off).flatten()
         selected_vr = self.pca.explained_variance_ratio_[selected_components]
 
@@ -122,32 +164,39 @@ class HealthScores():
         selected_vr = selected_vr[selected_vr>0.1]
         selected_components = selected_components[mod_idxs].flatten()
 
+        # Check number of selected PCs 
+        # If selected PCs are less than 1 because both of the above conditions aren't met, change PCs to 1
         self.n = len(selected_components)
         if self.n < 1:
             self.n = 1
 
-        #weights assigned to each pc
+        # Weights assigned to every PC 
         weights = np.exp((np.log(self.pca.explained_variance_) - np.log(logsumexp(self.pca.explained_variance_[:self.n]))))
 
+        # Choose only n selected PCs
         weights = weights[:self.n]
 
-        #choose only the pc's who satisfies the constraint
+        # Keep only the eigenvector correlations that satisfy the indicator variable loading cutoff 
         self.var_load = self.pca.components_.T[:, :self.n]
         self.var_load[self.var_load > calc] = 0
 
-        #scores assigned to each component
+        # Calculate feature scores for every feature 
         factor_scores = self.var_load @ weights
 
-        #calculate the health score for every town
-        health_status = np.array([determinant_data @ factor_scores]).T
+        # Calculate the health score for every town by multiplying the original data value to the feature score.
+        # The final health score for every town is a linear combination of the health scores 
+        health_status = np.array([loaded_data @ factor_scores]).T
         health_status = MinMaxScaler().fit_transform(health_status)
         health_status = health_status.flatten()
         
+        # Round scores to 2 decimal places
         scores = [round(x,2) for x in health_status]
+
+        # Get town names
         towns = self.extract_towns()
 
         if(write == True):
-            #assign health scores
+            # Combine the towns, health scores to write to a file
             health_scores = sorted(zip(towns, scores), key = lambda x: x[1])
 
             with open(self.output, "w", newline="") as f:
@@ -158,20 +207,35 @@ class HealthScores():
         return scores 
 
     def factor_analysis(self, write=False):
+        '''
+        Function to get the features and their importance in factor analysis
+        Args: 
+            write: Boolean variable to choose whether to write the output to a file or not. 
+        Returns: 
+            inp: pandas DataFrame that contains the original data 
+            sorted_mag: list of tuples to store the features and their importance in decreasing format
+        '''
         inp = pd.read_csv(self.data, index_col=0)
+
+        # fa stores the output of the factor_analyzer 
         fa = FactorAnalyzer(n_factors = self.n, rotation='varimax')
         
+        # fits the input to get feature importances
         fa.fit(inp)
+
+        # gets the factor loadings 
         magnitude = fa.get_communalities()
 
         feat = self.extract_features()
 
+        # Dictionary to hold the correct feature name to the number
         mag_dict = {}
         for t,f in enumerate(feat):
             mag_dict[f] = magnitude[t]
         
         sorted_mag = sorted(mag_dict.items(), key=lambda kv:kv[1], reverse=True)
         
+        # Writes the output of factor analysis to a file
         if write==True:
             factors = pd.DataFrame(sorted_mag, columns=['Feature','Importance'])
             factors.to_csv(self.fa_file, index=False)
@@ -179,7 +243,17 @@ class HealthScores():
         return inp, sorted_mag
 
     def factor_analysis_perdomain(self, write=False):
+        '''
+        Function to perform factor analysis per domain
+        Args: 
+            write: Boolean variable to choose whether to write the output to a file or not. 
+        Returns:
+            None
+        '''
+        # load domains into domain data 
         domain_data = self.load_domains()
+
+        # Get mapping of original numbers to shuffled numbers 
         true_num = list(pd.read_csv(self.data, index_col=0))
         for d in self.domains:
             curr = domain_data[d]
@@ -193,6 +267,7 @@ class HealthScores():
             inp = domain_data[d]
             fa = FactorAnalyzer(n_factors = self.n, rotation='varimax')
 
+            # In some cases, factor analysis does not success 
             try:
                 fa.fit(inp)
             except:
@@ -214,17 +289,45 @@ class HealthScores():
                     factors.to_csv('output/fa_'+str(d)+'_'+str(self.VER)+'.csv', index=False)
 
     def load_data(self):
+        '''
+        Read data from file and convert to numpy array
+        Args:
+            None
+        Returns:
+            Numpy array of data 
+        '''
         data = pd.read_csv(self.data, index_col=0)
         return np.array(data)
     
     def calc_cov_mat(self, A):
+        '''
+        Calculate covariance matrix of given data
+        Args:
+            A: data matrix
+        Returns:
+            covariance matrix of A 
+        '''
         return np.cov(A.T)
     
     def calc_corr_mat(self, A):
+        '''
+        Calculate correlation matrix of given data
+        Args:
+            A: data matrix
+        Returns:
+            correlation matrix of A 
+        '''
         return np.corrcoef(A, rowvar = False)
 
     def calc_loadings(self): 
-        #print table of indicator variable loadings
+        '''
+        Print and calculate the eigenvector correlations that account 
+        for feature scores in the health score calculations
+        Args:
+            
+        Returns:
+            
+        '''
         load_table = []
         for i in range(self.n):
             load_table.append(self.var_load[:, i])
@@ -412,7 +515,15 @@ class HealthScores():
                 for loc in location:
                     if str(loc) not in columns_to_drop:
                         columns_to_drop.append(str(loc))
+
+        dropped_col_names = []
+        name_to_num = {}
+        for t,f in enumerate(self.extract_features()):
+            name_to_num[t] = f
+        for col in columns_to_drop:
+            dropped_col_names.append(name_to_num[int(col)])
         
+        print('Dropped column names in ',self.data,' is: ', dropped_col_names)
         decorrelated = inp.drop(columns=columns_to_drop)
         column_num = list(map(int, list(decorrelated)))
         column_name = list(np.array(self.extract_features())[column_num])

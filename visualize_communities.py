@@ -12,8 +12,7 @@ import matplotlib.pyplot as plt
 plt.style.use('ggplot')
 plt.rcParams['figure.figsize'] = (11, 7)
 
-# def visualize_scores(locations=['Boston', 'Amherst', 'Springfield']):
-def visualize_scores(locations=['Boston']):
+def visualize_scores(locations=['Boston', 'Amherst', 'Springfield']):
     
     """ Creates bar plots for every town in ``locations`` """
     

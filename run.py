@@ -1,4 +1,9 @@
 from pca import HealthScores
+import sys
+
+if not sys.warnoptions:
+    import warnings
+    warnings.simplefilter("ignore")
 
 DETERMINANT_STD = {'cols_filepath':"data/health_determinants.csv", 
                     'data_filepath':"data/determinant_data_std.csv",
